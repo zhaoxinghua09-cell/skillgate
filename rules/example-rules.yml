@@ -1,0 +1,30 @@
+# SkillGate Example Custom Rules
+# Copy this file to .skillgate/rules/ to add your own rules
+
+rules:
+  - id: custom-python-eval
+    description: "Detected eval() call — use ast.literal_eval() instead"
+    severity: HIGH
+    languages: [python]
+    patterns:
+      - "eval\\("
+      - "exec\\("
+    fix: "Replace eval() with ast.literal_eval() for safe literal parsing"
+
+  - id: custom-js-innerhtml
+    description: "Direct innerHTML assignment — risk of XSS"
+    severity: MEDIUM
+    languages: [javascript, typescript]
+    patterns:
+      - "\\.innerHTML\\s*="
+      - "\\.outerHTML\\s*="
+    fix: "Use textContent() or sanitize input first"
+
+  - id: custom-secret-api-key
+    description: "Hardcoded API key detected"
+    severity: CRITICAL
+    languages: [python, javascript, typescript, go]
+    patterns:
+      - "api_key\\s*=\\s*['\"][a-zA-Z0-9]{20,}['\"]"
+      - "API_KEY\\s*=\\s*['\"][a-zA-Z0-9]{20,}['\"]"
+    fix: "Move to environment variable: os.getenv('API_KEY')"
