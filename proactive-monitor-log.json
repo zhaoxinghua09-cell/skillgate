@@ -1,0 +1,40 @@
+[
+  {
+    "timestamp": "2026-10-27T22:45:04.970176",
+    "overall_status": "ok",
+    "checks": [
+      {
+        "status": "ok",
+        "message": "错误队列为空"
+      },
+      {
+        "status": "ok",
+        "message": "暂无 traces 数据"
+      },
+      {
+        "status": "ok",
+        "message": "✅ 成本正常——已用 0%",
+        "used_percent": 0.003287798828548855
+      }
+    ]
+  },
+  {
+    "timestamp": "2026-10-27T22:49:52.234381",
+    "overall_status": "ok",
+    "checks": [
+      {
+        "status": "ok",
+        "message": "错误队列为空"
+      },
+      {
+        "status": "ok",
+        "message": "暂无 traces 数据"
+      },
+      {
+        "status": "ok",
+        "message": "✅ 成本正常——已用 0%",
+        "used_percent": 0.003287798828548855
+      }
+    ]
+  }
+]
