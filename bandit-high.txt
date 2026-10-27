@@ -1,0 +1,31 @@
+﻿bandit : [main]	INFO	profile include tests: None
+所在位置 行:1 字符: 83
++ ... e-project"; bandit -r . -ll --format custom --msg-template "{abspath} ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([main]	INFO	profile include tests: None:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[main]	INFO	profile exclude tests: None
+[main]	INFO	cli include tests: None
+[main]	INFO	cli exclude tests: None
+[main]	INFO	running on Python 3.13.15
+Working... ---------------------------------------- 100% 0:00:00
+C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\alert.py:27:B310:Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.
+C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\cache.py:18:B324:Use of weak MD5 hash for security. Consider usedforsecurity=False
+C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\ci-simulator.py:26:B602:subprocess call with shell=True identified, security issue.
+C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\dep_tree.py:48:B310:Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.
+C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\dep_tree.py:87:B310:Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.
+C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\llm_judge.py:48:B310:Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.
+C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\run-all-tests.py:17:B602:subprocess call with shell=True identified, security issue.
+C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\run.py:13:B602:subprocess call with shell=True identified, security issue.
+C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:482:B310:Audit url open for permitted schemes. Allowing use of file:/ or custom schemes is often unexpected.
+C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:937:B318:Using xml.dom.minidom.parseString to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.dom.minidom.parseString with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called
+C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\tests\fixtures\dangerous-skill\scripts\bad.py:8:B605:Starting a process with a shell, possible injection detected, security issue.
+C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\tests\fixtures\dangerous-skill\scripts\bad.py:9:B307:Use of possibly insecure function - consider using safer ast.literal_eval.
+C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\tests\fixtures\dangerous-skill\scripts\bad.py:10:B602:subprocess call with shell=True identified, security issue.
+C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\tests\fixtures\third-party-project\main.py:13:B113:Call to requests without timeout
+C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\tests\test_skillgate.py:109:B108:Probable insecure usage of temp file/directory.
+C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\tests\test_skillgate.py:125:B108:Probable insecure usage of temp file/directory.
+C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\tests\test_skillgate.py:137:B108:Probable insecure usage of temp file/directory.
+C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\tests\test_skillgate.py:182:B108:Probable insecure usage of temp file/directory.
+C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\tests\test_skillgate.py:197:B108:Probable insecure usage of temp file/directory.
