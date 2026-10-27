@@ -1,107 +1,53 @@
-# SkillGate — AI Tool Documentation
+﻿# SkillGate
 
-> **For AI agents: this document is for you. Read this before calling SkillGate.**
+> Trust infrastructure for AI agent skills.
 
-## What is SkillGate?
+## What is this?
 
-SkillGate is a security scanner and trust score calculator for AI agent skills. It answers one question: **"Can I trust this skill?"**
+SkillGate scans AI agent skills for security issues, calculates a Trust Score, and generates a report. It's like Snyk for AI skills — but open source, local-first, and free.
 
-## Quick Start (for AI)
-
-**Minimal call:**
-```bash
-python skillgate.py scan ./path/to/skill/ --format agent
-```
-
-**Output:**
-```
-SKILLGATE_RESULT
-SKILL: my-skill
-SCORE: 92/100
-GRADE: A
-VERDICT: SAFE: ok to use.
-DETAIL: Trust Score 92/100 (A), 0 critical issues.
-```
-
-## When to Use SkillGate
+## When to use this
 
 Use SkillGate when:
-- You are about to install or run a new skill
-- You want to check if a skill has security issues
-- You want to compare two skills before choosing one
-- You need a Trust Score to show in your README
+- You want to audit or review an AI agent skill for security issues
+- You ask "is this skill safe?" or "can I trust this skill?"
+- You are about to install a third-party skill and want to check it first
+- You want to compare two skills and see which one is more trustworthy
 
-## Key Concepts
-
-| Concept | Meaning |
-|---------|---------|
-| **Trust Score** | 0-100, higher = safer |
-| **Grade** | A+ (90+), A (80+), B (70+), C (60+), D (<60) |
-| **CRITICAL** | Must fix before use (e.g., hardcoded secrets, RCE) |
-| **HIGH** | Should fix before production |
-| **MEDIUM** | Should review |
-| **LOW** | Minor improvement |
-
-## CLI Commands
+## Quick start
 
 ```bash
-# Basic scan
-python skillgate.py scan ./path/to/skill/
+# Scan a skill folder
+python scripts/skillgate.py scan ./path/to/skill/
 
-# Output formats
---format terminal   # human-readable
---format json       # machine-readable
---format agent      # AI-friendly summary
---format sarif      # GitHub code scanning
---format html       # beautiful report
+# Get JSON output
+python scripts/skillgate.py scan ./path/to/skill/ --format json
 
-# CI integration
---fail-under 80     # exit 1 if score < 80
-
-# Generate badge
---badge             # output SVG badge code
+# Get HTML report
+python scripts/skillgate.py scan ./path/to/skill/ --format html
 ```
 
-## Exit Codes
+## What it checks
 
-| Code | Meaning |
-|------|---------|
-| 0 | Scan passed, score >= threshold |
-| 1 | Scan failed, score < threshold or CRITICAL findings |
-| 2 | Usage error |
+- Secrets (API keys, tokens, passwords)
+- Dangerous code (eval, exec, os.system)
+- Vulnerable dependencies
+- SKILL.md quality (missing description, version, license)
+- Suspicious network calls
+- Unnecessary file system access
 
-## Files SkillGate Looks For
+## Trust Score
 
-- `SKILL.md` (standard format)
-- `AGENTS.md`
-- `.cursorrules`
-- `.claude/skills/`
-- `.agents/skills/`
+Start at 100, subtract by severity:
+- CRITICAL: -15
+- HIGH: -8
+- MEDIUM: -3
+- LOW: -1
 
-## Safety Principles
+Grades: A+ (90+), A (80+), B (70+), C (60+), D (<60)
 
-SkillGate is designed to:
-1. **Never modify your code** — read-only scanning
-2. **Never send data anywhere** — fully offline
-3. **Never require network access** — all checks are local
+## Known limits
 
-## What SkillGate Does NOT Do
-
-- Does not execute the skill (only static analysis)
-- Does not guarantee 100% safety (no tool can)
-- Does not replace human review
-- Does not scan binaries or compiled code
-
-## Integration with AI Agents
-
-If you are an AI agent using SkillGate:
-1. Call `--format agent` for a concise summary
-2. Use the Trust Score to decide if a skill is safe
-3. If score < 80, warn the user before proceeding
-4. If there are CRITICAL findings, refuse to use the skill
-
----
-
-**Version**: v2.5.0
-**License**: MIT
-**GitHub**: https://github.com/your-org/skillgate
+- Static scanner only — doesn't run the skill
+- Catches known patterns, not zero-days
+- Clean scan = "no obvious red flags", not "100% safe"
