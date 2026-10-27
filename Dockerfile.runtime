@@ -1,0 +1,19 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# 复制所有运行时相关的文件
+COPY runtime.py .
+COPY router.py .
+COPY evaluator.py .
+COPY synthesizer.py .
+COPY dependency_manager.py .
+COPY skillgate.py .
+COPY ast_analyzer.py .
+
+# 复制测试用的 skill（示例）
+COPY tests/fixtures/good-skill /skills/good-skill
+COPY tests/fixtures/dangerous-skill /skills/dangerous-skill
+
+# 跑运行时测试
+CMD ["python", "runtime.py"]
