@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillGate — Trust Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #30363d;
+        }
+        .logo { font-size: 1.8rem; font-weight: bold; }
+        .logo span { color: #58a6ff; }
+        .nav { display: flex; gap: 20px; }
+        .nav a { color: #8b949e; text-decoration: none; }
+        .nav a:hover { color: #58a6ff; }
+
+        /* Stats grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 20px;
+            transition: transform 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-2px); }
+        .stat-number { font-size: 2rem; font-weight: bold; }
+        .stat-label { color: #8b949e; font-size: 0.85rem; margin-top: 4px; }
+        .stat-good { color: #3fb950; }
+        .stat-warn { color: #d29922; }
+        .stat-bad { color: #f85149; }
+        .stat-info { color: #58a6ff; }
+
+        /* Main content */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 900px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .refresh-btn {
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #e6edf3;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .refresh-btn:hover { background: #30363d; }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #21262d;
+        }
+        th { color: #8b949e; font-weight: 500; font-size: 0.85rem; }
+        tr:hover { background: #1c2128; }
+
+        .score-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+        .score-a { background: #238636; color: white; }
+        .score-b { background: #d29922; color: #1c1e21; }
+        .score-c { background: #da3633; color: white; }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        .dot-good { background: #3fb950; }
+        .dot-warn { background: #d29922; }
+        .dot-bad { background: #f85149; }
+
+        /* Chart placeholder */
+        .chart-placeholder {
+            height: 200px;
+            background: #0d1117;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8b949e;
+            font-size: 0.9rem;
+        }
+
+        /* Findings list */
+        .finding-item {
+            padding: 10px;
+            border-left: 3px solid;
+            margin-bottom: 10px;
+            background: #0d1117;
+            border-radius: 0 6px 6px 0;
+        }
+        .finding-critical { border-color: #f85149; }
+        .finding-high { border-color: #d29922; }
+        .finding-medium { border-color: #58a6ff; }
+        .finding-sev { font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
+        .finding-msg { font-size: 0.9rem; margin: 4px 0; }
+        .finding-loc { font-size: 0.8rem; color: #8b949e; }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 4px; margin-bottom: 15px; border-bottom: 1px solid #30363d; }
+        .tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            color: #8b949e;
+            border-bottom: 2px solid transparent;
+        }
+        .tab.active { color: #58a6ff; border-bottom-color: #58a6ff; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #8b949e;
+            font-size: 0.85rem;
+            padding-top: 20px;
+            border-top: 1px solid #30363d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">🛡️ <span>SkillGate</span> Dashboard</div>
+            <nav class="nav">
+                <a href="#overview">Overview</a>
+                <a href="#skills">Skills</a>
+                <a href="#alerts">Alerts</a>
+                <a href="#settings">Settings</a>
+            </nav>
+        </header>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number stat-info">3</div>
+                <div class="stat-label">Total Skills</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number stat-good">90.3</div>
+                <div class="stat-label">Avg Trust Score</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number stat-good">2</div>
+                <div class="stat-label">A+ Rated</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number stat-good">0</div>
+                <div class="stat-label">Critical Issues</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number stat-warn">1</div>
+                <div class="stat-label">Medium Issues</div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <!-- Left column -->
+            <div>
+                <!-- Skills table -->
+                <div class="panel">
+                    <div class="panel-title">
+                        Skills
+                        <button class="refresh-btn">↻ Scan All</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Trust Score</th>
+                                <th>Grade</th>
+                                <th>Status</th>
+                                <th>Last Scan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>iso14971-risk-matrix</strong></td>
+                                <td><span class="score-badge score-a">100</span></td>
+                                <td><span class="score-badge score-a">A+</span></td>
+                                <td><span class="status-dot dot-good"></span>Healthy</td>
+                                <td>2026-10-27</td>
+                            </tr>
+                            <tr>
+                                <td><strong>medxpert-termbase</strong></td>
+                                <td><span class="score-badge score-a">93</span></td>
+                                <td><span class="score-badge score-a">A+</span></td>
+                                <td><span class="status-dot dot-good"></span>Healthy</td>
+                                <td>2026-10-27</td>
+                            </tr>
+                            <tr>
+                                <td><strong>reg-citation-normalizer</strong></td>
+                                <td><span class="score-badge score-b">78</span></td>
+                                <td><span class="score-badge score-b">B</span></td>
+                                <td><span class="status-dot dot-warn"></span>Needs Attention</td>
+                                <td>2026-10-27</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Findings -->
+                <div class="panel">
+                    <div class="panel-title">Recent Findings</div>
+                    <div class="tabs">
+                        <div class="tab active">All</div>
+                        <div class="tab">Critical</div>
+                        <div class="tab">High</div>
+                        <div class="tab">Medium</div>
+                    </div>
+                    <div class="finding-item finding-medium">
+                        <div class="finding-sev" style="color: #58a6ff;">Medium</div>
+                        <div class="finding-msg">requests 网络库</div>
+                        <div class="finding-loc">medxpert-termbase/scripts/term_check.py:12</div>
+                    </div>
+                    <div class="finding-item finding-medium">
+                        <div class="finding-sev" style="color: #58a6ff;">Medium</div>
+                        <div class="finding-msg">读取环境变量中的凭证</div>
+                        <div class="finding-loc">reg-citation-normalizer/scripts/cite_normalize.py:45</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right column -->
+            <div>
+                <!-- Trend chart -->
+                <div class="panel">
+                    <div class="panel-title">Trust Score Trend</div>
+                    <div class="chart-placeholder">
+                        📈 90.3 → 92.1 → 90.3 → 89.5 (last 4 scans)
+                    </div>
+                </div>
+
+                <!-- Alerts -->
+                <div class="panel">
+                    <div class="panel-title">Active Alerts</div>
+                    <div class="finding-item finding-medium">
+                        <div class="finding-sev" style="color: #d29922;">Warning</div>
+                        <div class="finding-msg">reg-citation-normalizer score dropped 5 points</div>
+                        <div class="finding-loc">2026-10-25 14:30</div>
+                    </div>
+                </div>
+
+                <!-- Quick actions -->
+                <div class="panel">
+                    <div class="panel-title">Quick Actions</div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <button class="refresh-btn" style="text-align: left;">🔍 Run Full Scan</button>
+                        <button class="refresh-btn" style="text-align: left;">📊 Generate Report</button>
+                        <button class="refresh-btn" style="text-align: left;">🔔 Configure Alerts</button>
+                        <button class="refresh-btn" style="text-align: left;">⬇️ Export SARIF</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>SkillGate v0.3.0 — Trust infrastructure for AI agent skills</p>
+            <p style="margin-top: 8px;">MIT License · Built with ❤️ for the open source community</p>
+        </footer>
+    </div>
+</body>
+</html>
