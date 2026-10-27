@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillGate — Enterprise Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            line-height: 1.6;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 30px 20px; }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #30363d;
+        }
+        .logo { font-size: 1.5rem; font-weight: bold; }
+        .logo span { color: #58a6ff; }
+        .nav { display: flex; gap: 20px; }
+        .nav a { color: #8b949e; text-decoration: none; cursor: pointer; }
+        .nav a:hover { color: #58a6ff; }
+        .nav a.active { color: #58a6ff; }
+
+        /* Alert banner */
+        .alert-banner {
+            background: #1f6feb33;
+            border: 1px solid #1f6feb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .alert-icon { font-size: 1.5rem; }
+        .alert-text { flex: 1; }
+
+        /* Stats grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: #58a6ff;
+        }
+        .stat-number { font-size: 1.8rem; font-weight: bold; }
+        .stat-label { color: #8b949e; font-size: 0.85rem; margin-top: 4px; }
+        .stat-change { font-size: 0.8rem; margin-top: 4px; }
+        .up { color: #3fb950; }
+        .down { color: #f85149; }
+
+        /* Main grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 1000px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn {
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #e6edf3;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .btn:hover { background: #30363d; }
+        .btn-primary { background: #1f6feb; border-color: #1f6feb; }
+        .btn-primary:hover { background: #388bfd; }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #21262d;
+        }
+        th { color: #8b949e; font-weight: 500; font-size: 0.85rem; }
+        tr:hover { background: #1c2128; cursor: pointer; }
+
+        .score-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+        .score-a { background: #238636; color: white; }
+        .score-b { background: #d29922; color: #1c1e21; }
+        .score-c { background: #da3633; color: white; }
+
+        /* Chart placeholder */
+        .chart-area {
+            height: 250px;
+            background: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: flex-end;
+            padding: 20px;
+            gap: 8px;
+        }
+        .bar {
+            flex: 1;
+            background: linear-gradient(180deg, #1f6feb 0%, #388bfd 100%);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            min-height: 20px;
+        }
+        .bar-label {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: #8b949e;
+        }
+
+        /* Finding item */
+        .finding-item {
+            padding: 12px;
+            border-left: 3px solid;
+            margin-bottom: 10px;
+            background: #0d1117;
+            border-radius: 0 6px 6px 0;
+        }
+        .finding-critical { border-color: #f85149; }
+        .finding-high { border-color: #d29922; }
+        .finding-medium { border-color: #58a6ff; }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 4px; margin-bottom: 15px; border-bottom: 1px solid #30363d; }
+        .tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            color: #8b949e;
+            border-bottom: 2px solid transparent;
+        }
+        .tab.active { color: #58a6ff; border-bottom-color: #58a6ff; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #8b949e;
+            font-size: 0.85rem;
+            padding-top: 20px;
+            border-top: 1px solid #30363d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">🛡️ <span>SkillGate</span> Enterprise</div>
+            <nav class="nav">
+                <a href="#" class="active">Overview</a>
+                <a href="#">Skills</a>
+                <a href="#">Dependencies</a>
+                <a href="#">Alerts</a>
+                <a href="#">Team</a>
+                <a href="#">Settings</a>
+            </nav>
+        </header>
+
+        <!-- Alert banner -->
+        <div class="alert-banner">
+            <div class="alert-icon">⚠️</div>
+            <div class="alert-text">
+                <strong>2 new vulnerabilities detected</strong> in <code>reg-citation-normalizer</code>
+                <span style="color: #8b949e; margin-left: 10px;">· 2 hours ago</span>
+            </div>
+            <button class="btn">View Details</button>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" style="color: #58a6ff;">3</div>
+                <div class="stat-label">Total Skills</div>
+                <div class="stat-change up">↑ 1 this week</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" style="color: #3fb950;">96.3</div>
+                <div class="stat-label">Avg Trust Score</div>
+                <div class="stat-change up">↑ 3.2 from last month</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" style="color: #3fb950;">2</div>
+                <div class="stat-label">A+ Rated</div>
+                <div class="stat-change up">↑ 1</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" style="color: #f85149;">1</div>
+                <div class="stat-label">Critical Issues</div>
+                <div class="stat-change down">↑ 1 new</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" style="color: #d29922;">4</div>
+                <div class="stat-label">Dependencies</div>
+                <div class="stat-change">2 vulnerable</div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <!-- Left column -->
+            <div>
+                <!-- Skills table -->
+                <div class="panel">
+                    <div class="panel-title">
+                        Skills
+                        <div>
+                            <button class="btn">↻ Refresh</button>
+                            <button class="btn btn-primary">+ Add Skill</button>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Trust Score</th>
+                                <th>Grade</th>
+                                <th>Status</th>
+                                <th>Dependencies</th>
+                                <th>Last Scan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>iso14971-risk-matrix</strong></td>
+                                <td><span class="score-badge score-a">100</span></td>
+                                <td><span class="score-badge score-a">A+</span></td>
+                                <td>🟢 Healthy</td>
+                                <td>0 vulnerable</td>
+                                <td>2026-10-27</td>
+                            </tr>
+                            <tr>
+                                <td><strong>medxpert-termbase</strong></td>
+                                <td><span class="score-badge score-a">96</span></td>
+                                <td><span class="score-badge score-a">A+</span></td>
+                                <td>🟢 Healthy</td>
+                                <td>0 vulnerable</td>
+                                <td>2026-10-27</td>
+                            </tr>
+                            <tr>
+                                <td><strong>reg-citation-normalizer</strong></td>
+                                <td><span class="score-badge score-b">78</span></td>
+                                <td><span class="score-badge score-b">B</span></td>
+                                <td>🟡 Needs Attention</td>
+                                <td>2 vulnerable</td>
+                                <td>2026-10-27</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Trust Score Trend -->
+                <div class="panel">
+                    <div class="panel-title">Trust Score Trend (6 months)</div>
+                    <div class="chart-area">
+                        <div class="bar" style="height: 60%;"><span class="bar-label">May</span></div>
+                        <div class="bar" style="height: 65%;"><span class="bar-label">Jun</span></div>
+                        <div class="bar" style="height: 70%;"><span class="bar-label">Jul</span></div>
+                        <div class="bar" style="height: 75%;"><span class="bar-label">Aug</span></div>
+                        <div class="bar" style="height: 85%;"><span class="bar-label">Sep</span></div>
+                        <div class="bar" style="height: 96%;"><span class="bar-label">Oct</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right column -->
+            <div>
+                <!-- Dependencies -->
+                <div class="panel">
+                    <div class="panel-title">Dependency Vulnerabilities</div>
+                    <div class="finding-item finding-critical">
+                        <div style="font-size: 0.75rem; font-weight: bold; color: #f85149;">CRITICAL</div>
+                        <div style="margin: 4px 0;">requests==2.28.0</div>
+                        <div style="font-size: 0.8rem; color: #8b949e;">CVE-2023-32681: Proxy-Authorization leak</div>
+                        <button class="btn" style="margin-top: 8px;">Fix Now</button>
+                    </div>
+                    <div class="finding-item finding-high">
+                        <div style="font-size: 0.75rem; font-weight: bold; color: #d29922;">HIGH</div>
+                        <div style="margin: 4px 0;">pyyaml==5.4</div>
+                        <div style="font-size: 0.8rem; color: #8b949e;">CVE-2020-14343: Arbitrary code execution</div>
+                        <button class="btn" style="margin-top: 8px;">Fix Now</button>
+                    </div>
+                </div>
+
+                <!-- Recent Alerts -->
+                <div class="panel">
+                    <div class="panel-title">Recent Alerts</div>
+                    <div style="font-size: 0.9rem;">
+                        <div style="padding: 8px 0; border-bottom: 1px solid #21262d;">
+                            🟡 reg-citation-normalizer score dropped 5 points<br>
+                            <span style="color: #8b949e; font-size: 0.8rem;">2 hours ago</span>
+                        </div>
+                        <div style="padding: 8px 0; border-bottom: 1px solid #21262d;">
+                            🔴 New CVE found in requests<br>
+                            <span style="color: #8b949e; font-size: 0.8rem;">Yesterday</span>
+                        </div>
+                        <div style="padding: 8px 0;">
+                            🟢 medxpert-termbase score improved<br>
+                            <span style="color: #8b949e; font-size: 0.8rem;">3 days ago</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="panel">
+                    <div class="panel-title">Quick Actions</div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <button class="btn" style="text-align: left;">🔍 Run Full Scan</button>
+                        <button class="btn" style="text-align: left;">📊 Generate Report</button>
+                        <button class="btn" style="text-align: left;">🔔 Configure Alerts</button>
+                        <button class="btn" style="text-align: left;">⬇️ Export SARIF</button>
+                        <button class="btn" style="text-align: left;">👥 Invite Team</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>SkillGate v1.6.0 Enterprise — Trust infrastructure for AI agent skills</p>
+            <p style="margin-top: 8px;">MIT License · Built for the open source community</p>
+        </footer>
+    </div>
+</body>
+</html>
