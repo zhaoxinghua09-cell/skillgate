@@ -360,6 +360,14 @@ A: Yes! MIT license, free for everyone — personal and commercial use.
 
 ---
 
+## 📸 Screenshots
+
+| Terminal Output | HTML Report |
+|-----------------|-------------|
+| ![Terminal Output](https://via.placeholder.com/400x250?text=Terminal+Scan+Output) | ![HTML Report](https://via.placeholder.com/400x250?text=HTML+Report) |
+
+---
+
 ## 🆘 Getting Help
 
 Stuck? Here's where to go:
