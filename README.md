@@ -84,11 +84,21 @@ SkillGate is built on the **LGD Trust Framework** (有籍 / 有证 / 有门禁):
 
 ## 🚀 Quick Start
 
-### Install
+### Install as an Agent Skill (recommended)
+
+One command install — works with Claude Code, Cursor, Codex, and any agent that supports the skills standard:
+
+```bash
+npx skills add zhaoxinghua09-cell/skillgate
+```
+
+Then just ask your agent: *"check if this skill is safe"* — it will use SkillGate automatically.
+
+### Install as a CLI tool
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-org/skillgate.git
+git clone https://github.com/zhaoxinghua09-cell/skillgate.git
 cd skillgate
 
 # Install (no dependencies needed!)
