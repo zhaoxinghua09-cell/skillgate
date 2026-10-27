@@ -337,6 +337,18 @@ A: Yes! MIT license, free for everyone — personal and commercial use.
 
 ---
 
+## 🆘 Getting Help
+
+Stuck? Here's where to go:
+
+- 💬 **Questions & discussions** — [GitHub Discussions](https://github.com/zhaoxinghua09-cell/skillgate/discussions)
+- 🐛 **Found a bug?** — [Open an issue](https://github.com/zhaoxinghua09-cell/skillgate/issues/new?template=bug_report.yml)
+- ✨ **Want a new feature?** — [Request a feature](https://github.com/zhaoxinghua09-cell/skillgate/issues/new?template=feature_request.yml)
+- 📚 **Documentation** — [GitHub Pages](https://zhaoxinghua09-cell.github.io/skillgate/)
+- 🔒 **Report a security issue** — See [SECURITY.md](SECURITY.md)
+
+---
+
 ## 🤝 Contributing
 
 We love contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
