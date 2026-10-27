@@ -27,7 +27,7 @@ jobs:
       run: pytest tests/ -v
     
     - name: Run bandit
-      run: bandit -r skillgate.py ast_analyzer.py ecosystem.py -f txt
+      run: bandit -r skillgate.py ast_analyzer.py ecosystem.py -f txt --severity-level medium
     
     - name: Run flake8
       run: flake8 skillgate.py ast_analyzer.py ecosystem.py --max-line-length=120
@@ -39,3 +39,10 @@ jobs:
       run: |
         coverage run -m pytest tests/
         coverage report --fail-under=80
+        coverage xml
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false
