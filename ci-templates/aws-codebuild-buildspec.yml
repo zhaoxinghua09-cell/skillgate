@@ -1,0 +1,18 @@
+# SkillGate AWS CodeBuild BuildSpec
+# Save as buildspec.yml in your project root
+
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - pip install skillgate
+  build:
+    commands:
+      - skillgate scan ./my-skill/ --fail-under 80 --format sarif --output skillgate.sarif
+
+artifacts:
+  files:
+    - skillgate.sarif
