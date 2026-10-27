@@ -2,7 +2,9 @@
 
 **Xinghua Zhao**  
 Independent Researcher  
-2026-10-27
+📧 zhaoxinghua07@126.com  
+🌐 https://github.com/zhaoxinghua09-cell/skillgate  
+📅 2026-10-27
 
 ---
 
@@ -203,6 +205,22 @@ By making it easy for users to answer the question *"can I trust this skill?"*, 
 ## Availability
 
 SkillGate is open source and available at: https://github.com/zhaoxinghua09-cell/skillgate
+
+---
+
+## Cite this paper
+
+If you use SkillGate in your research, please cite:
+
+```bibtex
+@misc{zhao2026skillgate,
+  title={SkillGate: Trust Infrastructure for AI Agent Skills},
+  author={Zhao, Xinghua},
+  year={2026},
+  howpublished={\url{https://github.com/zhaoxinghua09-cell/skillgate}},
+  note={Zenodo DOI: pending}
+}
+```
 
 ---
 
