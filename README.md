@@ -13,6 +13,8 @@ Open-source security scanner + capability evaluator + continuous monitoring for 
 [![Cursor](https://img.shields.io/badge/Cursor-✅-000000)](https://www.cursor.com/)
 [![Codex](https://img.shields.io/badge/Codex-✅-412991)](https://openai.com/index/codex/)
 [![Gemini](https://img.shields.io/badge/Gemini-✅-4285F4)](https://gemini.google.com/)
+[![GitHub Copilot](https://img.shields.io/badge/Copilot-✅-24292e)](https://github.com/features/copilot)
+[![OpenCode](https://img.shields.io/badge/OpenCode-✅-6366f1)](https://opencode.ai/)
 [![CI](https://github.com/zhaoxinghua09-cell/skillgate/actions/workflows/ci.yml/badge.svg)](https://github.com/zhaoxinghua09-cell/skillgate/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/zhaoxinghua09-cell/skillgate/actions/workflows/codeql.yml/badge.svg)](https://github.com/zhaoxinghua09-cell/skillgate/actions/workflows/codeql.yml)
 [![Codecov](https://codecov.io/gh/zhaoxinghua09-cell/skillgate/branch/main/graph/badge.svg)](https://codecov.io/gh/zhaoxinghua09-cell/skillgate)
