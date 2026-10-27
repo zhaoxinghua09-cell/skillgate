@@ -1,0 +1,13 @@
+# SkillGate Bitbucket Pipelines Configuration
+# Copy to bitbucket-pipelines.yml
+
+pipelines:
+  default:
+    - step:
+        name: SkillGate Security Scan
+        image: python:3.11-slim
+        script:
+          - pip install skillgate
+          - skillgate scan ./my-skill/ --fail-under 80 --format sarif --output skillgate.sarif
+        artifacts:
+          - skillgate.sarif
