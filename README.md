@@ -288,6 +288,20 @@ Three gates, one score:
 
 ---
 
+## 🗺️ Roadmap
+
+What's next for SkillGate?
+
+- [x] **v1.0.0** — Basic security scanner + Trust Score (released!)
+- [ ] **v1.1.0** — MCP Server integration — let other agents call SkillGate as a tool
+- [ ] **v1.2.0** — VSCode extension — inline diagnostics while you write skills
+- [ ] **v1.3.0** — GitHub App — automatically comment on PRs with Trust Score
+- [ ] **v1.4.0** — Cloud service — team dashboards, shared policy, continuous monitoring
+
+Want to help build one of these? Check out [CONTRIBUTING.md](CONTRIBUTING.md)!
+
+---
+
 ## ❓ FAQ
 
 **Q: Is SkillGate a replacement for Snyk or CodeQL?**
