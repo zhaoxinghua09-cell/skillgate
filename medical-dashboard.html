@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医械法规技能仪表盘</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #58a6ff;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #3fb950;
+        }
+        .stat-label {
+            color: #8b949e;
+            margin-top: 4px;
+        }
+        .section {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            color: #58a6ff;
+            margin-bottom: 16px;
+            font-size: 20px;
+        }
+        .skill-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+        }
+        .skill-item {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 12px;
+        }
+        .skill-name {
+            color: #58a6ff;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .skill-desc {
+            color: #8b949e;
+            font-size: 14px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-right: 4px;
+        }
+        .badge-basic { background: #1f6feb; color: white; }
+        .badge-advanced { background: #a371f7; color: white; }
+        .badge-ai { background: #f778ba; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 医械法规技能仪表盘</h1>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">13</div>
+                <div class="stat-label">总技能数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">7</div>
+                <div class="stat-label">基础合规</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">4</div>
+                <div class="stat-label">进阶合规</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">2</div>
+                <div class="stat-label">医疗 AI</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📦 基础合规（所有分类都要做）</h2>
+            <div class="skill-list">
+                <div class="skill-item">
+                    <div class="skill-name">reg-citation-normalizer</div>
+                    <div class="skill-desc">法规引用格式规范化</div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">medxpert-termbase</div>
+                    <div class="skill-desc">双语术语库 + 译稿 QA</div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">iso14971-risk-matrix</div>
+                    <div class="skill-desc">风险管理矩阵 + 文件自查</div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">iso13485-qms-check</div>
+                    <div class="skill-desc">质量管理体系文件检查</div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">ifu-labeling-check</div>
+                    <div class="skill-desc">标签和说明书（IFU）检查</div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">pms-post-market-check</div>
+                    <div class="skill-desc">上市后监督（PMS）检查</div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">change-control-check</div>
+                    <div class="skill-desc">变更控制程序检查</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔬 进阶合规（II 类、III 类要做）</h2>
+            <div class="skill-list">
+                <div class="skill-item">
+                    <div class="skill-name">iec62366-usability-check</div>
+                    <div class="skill-desc">可用性工程文件检查</div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">iec62304-sdlc-check</div>
+                    <div class="skill-desc">软件生命周期检查</div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">iso10993-biocompatibility-check</div>
+                    <div class="skill-desc">生物相容性报告检查</div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">cer-clinical-evaluation-check</div>
+                    <div class="skill-desc">CER 临床评价报告检查</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🤖 医疗 AI 专用</h2>
+            <div class="skill-list">
+                <div class="skill-item">
+                    <div class="skill-name">ai-medical-algorithm-check</div>
+                    <div class="skill-desc">医疗 AI 算法验证检查</div>
+                </div>
+                <div class="skill-item">
+                    <div class="skill-name">ai-dataset-quality-check</div>
+                    <div class="skill-desc">医疗 AI 数据集质量检查</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
