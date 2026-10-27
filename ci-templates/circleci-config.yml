@@ -1,0 +1,29 @@
+# SkillGate CircleCI Config
+# Copy this to .circleci/config.yml
+
+version: 2.1
+
+jobs:
+  skillgate-scan:
+    docker:
+      - image: cimg/python:3.11
+    steps:
+      - checkout
+      - run:
+          name: Install SkillGate
+          command: pip install skillgate
+      - run:
+          name: Run Security Scan
+          command: skillgate scan ./my-skill/ --fail-under 80 --format sarif --output skillgate.sarif
+      - store_artifacts:
+          path: skillgate.sarif
+
+workflows:
+  version: 2
+  skillgate:
+    jobs:
+      - skillgate-scan:
+          filters:
+            branches:
+              only:
+                - main
