@@ -1,0 +1,16 @@
+# Code owners file.
+# Each line is a file pattern followed by one or more owners.
+
+# These owners will be the default owners for everything in the repo.
+*       @zhaoxinghua09-cell
+
+# Order is important; the last matching pattern takes the most precedence.
+# When someone creates a PR that modifies the README, the following owners will
+# be requested for review:
+README.md       @zhaoxinghua09-cell
+docs/           @zhaoxinghua09-cell
+
+# The core scanner code is owned by the maintainer
+skillgate.py    @zhaoxinghua09-cell
+ast_analyzer.py @zhaoxinghua09-cell
+ecosystem.py    @zhaoxinghua09-cell
