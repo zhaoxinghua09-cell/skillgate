@@ -1,0 +1,13 @@
+{
+  "reg-citation-normalizer": {
+    "total_runs": 1,
+    "success_runs": 1,
+    "failed_runs": 0,
+    "history": [
+      {
+        "timestamp": "2026-10-27T22:39:13.065470",
+        "action": "run"
+      }
+    ]
+  }
+}
