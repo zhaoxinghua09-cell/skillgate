@@ -7,6 +7,12 @@
 Open-source security scanner + capability evaluator + continuous monitoring for the agent ecosystem.
 
 <p align="center">
+  <strong>Language:</strong>
+  <a href="README.md">English</a> |
+  <a href="README.zh-CN.md">简体中文</a>
+</p>
+
+<p align="center">
   <a href="https://www.star-history.com/zhaoxinghua09-cell/skillgate">
     <img src="https://api.star-history.com/badge?repo=zhaoxinghua09-cell/skillgate&type=trending" alt="Star History" height="20" />
   </a>
