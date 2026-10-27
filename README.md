@@ -6,6 +6,12 @@
 
 Open-source security scanner + capability evaluator + continuous monitoring for the agent ecosystem.
 
+<p align="center">
+  <a href="https://www.star-history.com/zhaoxinghua09-cell/skillgate">
+    <img src="https://api.star-history.com/badge?repo=zhaoxinghua09-cell/skillgate&type=trending" alt="Star History" height="20" />
+  </a>
+</p>
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Version](https://img.shields.io/github/v/release/zhaoxinghua09-cell/skillgate)](https://github.com/zhaoxinghua09-cell/skillgate/releases)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
