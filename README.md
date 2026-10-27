@@ -27,6 +27,7 @@ Open-source security scanner + capability evaluator + continuous monitoring for 
 [![Forks](https://img.shields.io/github/forks/zhaoxinghua09-cell/skillgate?style=social)](https://github.com/zhaoxinghua09-cell/skillgate/network/members)
 [![Last Commit](https://img.shields.io/github/last-commit/zhaoxinghua09-cell/skillgate)](https://github.com/zhaoxinghua09-cell/skillgate/commits/main)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Open Source Love](https://img.shields.io/badge/open%20source-%E2%9D%A4-pink.svg)](https://github.com/zhaoxinghua09-cell/skillgate)
 
 [Features](#-features) · [Quick Start](#-quick-start) · [Documentation](docs/) · [Rule Writing](docs/rules.md) · [Contributing](CONTRIBUTING.md)
 
