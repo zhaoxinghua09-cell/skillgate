@@ -1,37 +1,26 @@
-[build-system]
-requires = ["setuptools>=84.2.1"]
+﻿[build-system]
+requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "skillgate"
-version = "0.3.0"
+version = "1.0.0"
 authors = [
-  { name = "SkillGate Contributors" }
+  { name = "zhaoxinghua09-cell" }
 ]
-description = "Trust infrastructure for AI agent skills — scan, benchmark, and gate before you ship."
+description = "Trust infrastructure for AI agent skills"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.8"
 classifiers = [
-  "Development Status :: 4 - Beta",
-  "Intended Audience :: Developers",
-  "Topic :: Security",
-  "Topic :: Software Development :: Quality Assurance",
-  "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
 ]
-keywords = ["skill", "security", "scan", "gate", "ai", "agent", "trust"]
+keywords = ["security", "agent", "skills", "scanner", "trust"]
 
 [project.scripts]
 skillgate = "skillgate:main"
-skillbench = "skillbench:main"
-skillwatch = "skillwatch:main"
 
-[project.urls]
-Homepage = "https://github.com/your-org/skillgate"
-Repository = "https://github.com/your-org/skillgate"
-"Bug Tracker" = "https://github.com/your-org/skillgate/issues"
+[tool.setuptools]
+py-modules = ["skillgate", "ast_analyzer"]
