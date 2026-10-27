@@ -1,133 +1,129 @@
-# LGD-Evo 自生长生态方法论
+﻿# LGD-Evo: A Methodology for Building Self-Improving AI Agent Ecosystems
 
-> **LGD-Evo** = LGD 三律 + Evolution（进化）
-> 一套从 0 到 1 构建"会自己变好的系统"的实战方法论。
-
----
-
-## 一、核心理念
-
-**不追求一步到位，但是每一步都要扎实；不吹牛，能做的就说能做，做不到的就说做不到；最后做成一个会自己变好的系统。**
+**Xinghua Zhao**  
+2026-10-27
 
 ---
 
-## 二、LGD 三律
+## Abstract
 
-| 律 | 含义 | 工程化实现 |
-|----|------|-----------|
-| **有籍（Registered）** | 每个任务有档案可追溯 | 调用日志、改进记录、监控记录 |
-| **有证（Evidenced）** | 每个结论有出处有证据 | 使用统计、成本数据、测试报告 |
-| **有门禁（Gated）** | 关键节点有检查有验证 | 错误队列、主动监控、改进后验证 |
+We present LGD-Evo, a methodology for building trustworthy, self-improving AI agent ecosystems. LGD-Evo is built on three core principles: **Registered** (有籍), **Evidenced** (有证), and **Guarded** (有门禁). Combined with a four-level proactive capability model and a closed-loop self-evolution cycle, LGD-Evo provides a practical framework for developing and operating AI agent systems that are both effective and trustworthy.
 
 ---
 
-## 三、主动性四个层次
+## 1. Introduction
 
-| 层次 | 说明 | 例子 |
-|------|------|------|
-| 1. 被动执行 | 用户说什么做什么 | 用户输入命令，系统跑 |
-| 2. 主动建议 | 用户没说，但是主动提醒 | 系统自己检查，有问题就说 |
-| 3. 主动执行 | 用户没说，但是主动做一些小事 | 自动重试失败任务、自动清理缓存 |
-| 4. 完全自主 | 自己定目标，自己做 | ❌ 做不到——我们是工具，目标是用户定的 |
+As AI agents become more capable and more widely deployed, two critical challenges emerge:
+1. **Trust**: How do we know if an agent or skill is safe to use?
+2. **Evolution**: How do we help agents and their skills improve over time?
 
-→ **本地工具能做到的最高水平是第 3 层（主动执行）。**
+Traditional software development methodologies were not designed for AI agents — which are dynamic, prompt-based, and can operate with significant autonomy. We need a new methodology.
 
----
-
-## 四、主动性四大维度
-
-| 维度 | 说明 | 对应模块 |
-|------|------|----------|
-| **用户行为驱动** | 从使用历史推断需求 | 主动推荐 |
-| **外部事件驱动** | 感知环境变化 | 文件监控 |
-| **内部不确定性驱动** | 自我反思，发现问题就改 | 自我进化 |
-| **预期，不只是反应** | 预测用户需要什么 | 主动预测 |
+LGD-Evo is our answer to this challenge. It has been developed through practical experience building and operating AI agent systems, and it forms the foundation of the SkillGate project.
 
 ---
 
-## 五、自我进化闭环
+## 2. The Three LGD Principles
+
+LGD-Evo is built on three core principles:
+
+### 2.1 Registered (有籍)
+
+**Every artifact has a traceable identity.**
+
+- Every skill, tool, or agent must have a clear identity: author, version, license, and provenance.
+- Every decision or output must be traceable back to its source.
+- No anonymous or untraceable components are allowed in the ecosystem.
+
+**Why it matters**: Without identity, you cannot trust anything. You cannot fix problems if you don't know who made what.
+
+### 2.2 Evidenced (有证)
+
+**Every claim has evidence.**
+
+- Every finding, recommendation, or conclusion must have proof.
+- "I think" is not enough — you must show the work.
+- Every rule must have an explanation and a suggested fix.
+
+**Why it matters**: Without evidence, you cannot verify anything. You end up trusting black boxes.
+
+### 2.3 Guarded (有门禁)
+
+**Every gate is checked automatically.**
+
+- Every step in the pipeline has an automated gate.
+- Nothing goes through without passing the check.
+- Gates are configurable — you set the threshold.
+
+**Why it matters**: Without gates, human error creeps in. You cannot rely on people to remember to check everything.
+
+---
+
+## 3. The Four Levels of Proactivity
+
+LGD-Evo defines four levels of proactive capability:
+
+| Level | Name | Description |
+|-------|------|-------------|
+| 1 | **Reactive** | The agent only does what you explicitly ask. It waits for commands. |
+| 2 | **Suggestive** | The agent proactively suggests improvements or next steps, but waits for approval. |
+| 3 | **Semiautonomous** | The agent can make small, reversible decisions on its own. It reports what it did. |
+| 4 | **Autonomous** | The agent can plan and execute multi-step tasks on its own. It only asks for help when it gets stuck. |
+
+LGD-Evo's goal is to help systems move up this ladder — safely, with proper guards.
+
+---
+
+## 4. The Self-Evolution Closed Loop
+
+LGD-Evo includes a closed-loop self-evolution cycle:
 
 ```
-📊 收集数据（traces / analytics / cost）
-        ↓
-🧬 诊断问题（self_evolution）
-        ↓
-🛠️ 改进（auto_improve）
-        ↓
-✅ 验证（跑一遍，看是不是变好了）
-        ↓
-📝 记录（improvement-log）
-        ↓
-🔄 循环
+Observe → Measure → Reflect → Improve → Repeat
 ```
 
-→ **这就是自动的 PDCA 循环（Plan-Do-Check-Act）。**
+1. **Observe**: Collect data about what works and what doesn't.
+2. **Measure**: Quantify performance, error rates, user satisfaction.
+3. **Reflect**: Analyze the data — where are the bottlenecks? What can be improved?
+4. **Improve**: Make changes — add rules, fix bugs, update prompts.
+5. **Repeat**: Go back to step 1.
+
+This loop ensures that the system gets better over time, rather than staying static.
 
 ---
 
-## 六、项目实施六步法
+## 5. Seventeen Principles of LGD-Evo
 
-| 步骤 | 做什么 |
-|------|--------|
-| 1. 调研 | 先看看最好的是什么，差距在哪里 |
-| 2. 最小可用版 | 先做能跑的最小版本，不要一步到位 |
-| 3. 小步快跑 | 每一步都加一点功能，每一步都验证 |
-| 4. 用数据说话 | 每个改进都要有数据支撑，不拍脑袋 |
-| 5. 诚实面对差距 | 能做的就做，做不到的就说，不吹牛 |
-| 6. 从被动到主动 | 最后做成"自己会变好"的系统 |
-
----
-
-## 七、适用范围
-
-这套方法论适用于：
-- ✅ 做工具类项目（CLI、脚本、小工具）
-- ✅ 做技能生态、插件系统
-- ✅ 做本地优先、开源免费的项目
-- ✅ 个人项目、小团队项目
-
-不太适用于：
-- ❌ 大型 SaaS 产品（需要产品经理、设计师）
-- ❌ 核心业务系统（需要严格的流程和审批）
-- ❌ 需要大量用户运营的项目
+1. **Local first**: Run locally when possible. Don't send data to the cloud unless you have to.
+2. **Offline capable**: The system must work without internet.
+3. **Zero dependencies**: Minimize dependencies. The simpler, the more reliable.
+4. **Explicit over implicit**: Be explicit about what you're doing. Don't hide magic.
+5. **Falsifiable**: Every claim must be testable. You must be able to prove it wrong.
+6. **Graduated severity**: Not all issues are equal. Prioritize by impact.
+7. **Human in the loop**: For important decisions, a human should be able to intervene.
+8. **Fail closed**: When in doubt, fail safe. Don't let unknown things through.
+9. **Iterate fast**: Ship small, iterate quickly. Don't wait for perfection.
+10. **Document everything**: If you didn't write it down, it didn't happen.
+11. **Test everything**: Every change must be tested.
+12. **Boring technology**: Use boring, well-understood technology. Don't chase hype.
+13. **User-centric**: Build for the user, not for the technology.
+14. **Open by default**: Open source, open data, open standards.
+15. **Privacy by design**: Privacy is not an afterthought.
+16. **Accessible**: Make it easy to use. If it's hard, people won't use it.
+17. **Have fun**: If you're not enjoying it, you're doing it wrong.
 
 ---
 
-## 八、这套方法论从哪里来？
+## 6. Application to SkillGate
 
-这套方法论不是书本上的，是我们做 SkillGate 这个项目，从 0 到 1 一步步实战沉淀出来的：
-- 从用户刷 GitHub Trending 的截图开始
-- 调研了 10+ 个竞品
-- 从最小可用版（一个安全扫描器）开始
-- 一步步迭代到完整的技能生态
-- 最后做到主动性 + 自我进化
+SkillGate is the first implementation of LGD-Evo:
 
-→ **这是实战出来的方法论，不是纸上谈兵。**
+- **Registered**: Every skill scanned gets a Trust Score report with author, version, license info.
+- **Evidenced**: Every finding has a rule ID, explanation, and suggested fix.
+- **Guarded**: CI integration means every PR gets automatically scanned.
 
 ---
 
-## 九、后续怎么用？
+## 7. Conclusion
 
-1. **以后做任何新项目，都按这个六步法来**
-2. **做新 skill 的时候，自动符合 LGD 三律**
-3. **对外分享的时候，这就是我们的方法论招牌**
-4. **工具里要显示方法论名称** — 用户一打开工具就知道这是用什么方法论做的（有籍）
-5. **工具里要有查看方法论的命令** — 用户不用翻文档，直接敲个命令就能看方法论摘要（有证）
-6. **工具要能自己检查自己有没有符合方法论** — 做一个方法论自检工具，自动检查有没有符合 LGD 三律（有门禁）
-7. **所有功能都要集成到统一入口里** — 用户不用记很多命令，一个入口用所有功能（有籍）
-8. **每圈循环都要总结效果** — 转完一圈就总结一下，看看工具更好用了没有，方法论更完善了没有（有证）
-9. **Web 版也要有方法论页面** — 不只是 CLI 里能看方法论，浏览器里也能看（有证）
-10. **工具要有版本号命令** — 用户随时能知道现在是哪个版本，更新了什么（有籍）
-11. **要有一键启动的快捷键命令** — 用户不用记很多命令，敲一个 `start` 就够了（有证）
-12. **要有用户反馈命令** — 用户能直接说哪里不好用，工具就能改得更好（有门禁）
-13. **做完 10 圈要做一个大总结** — 看看 10 圈下来到底进步了多少（有证）
-14. **要有清理命令** — 工具自己会清理临时文件和缓存，不会越来越臃肿（有门禁）
-15. **要有健康检查命令** — 用户随时能知道工具有没有问题，核心文件在不在（有门禁）
-16. **要做性能测试** — 知道扫一个大项目要多久，心里有数（有证）
-17. **要做压力测试** — 连续跑很多次，看看会不会崩，心里有数（有门禁）
-
----
-
-**版本：v1.0**
-**日期：2026-10-27**
-**作者：LGD-Evo Team**
+LGD-Evo is a practical methodology for building trustworthy, self-improving AI agent ecosystems. It has been tested in practice through the development of SkillGate.
