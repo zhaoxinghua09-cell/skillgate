@@ -178,6 +178,20 @@ jobs:
 
 ---
 
+## 🏆 Trust Score Badge
+
+Add your skill's Trust Score badge to your README:
+
+```markdown
+[![SkillGate Trust Score](https://img.shields.io/badge/SkillGate-A%20(92/100)-brightgreen)](https://github.com/zhaoxinghua09-cell/skillgate)
+```
+
+It looks like this:
+
+[![SkillGate Trust Score](https://img.shields.io/badge/SkillGate-A%20(92/100)-brightgreen)](https://github.com/zhaoxinghua09-cell/skillgate)
+
+---
+
 ## 🧪 Skill Bench
 
 Run standardized test cases to measure real capability:
