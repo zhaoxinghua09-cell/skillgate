@@ -12,7 +12,7 @@ Independent Researcher
 
 As AI coding agents like Claude Code, Cursor, and Codex become mainstream, the ecosystem of shareable "skills" — reusable, prompt-based packages that extend agent capabilities — is growing rapidly. However, unlike traditional software packages, agent skills lack standardized trust infrastructure: users have no way to quickly assess whether a skill is safe, whether it will exfiltrate data, or whether it contains hidden malicious logic.
 
-We present **SkillGate**, the first open-source, local-first trust infrastructure specifically designed for AI agent skills. SkillGate combines:
+We present **SkillGate**, an open-source, local-first trust infrastructure designed for AI agent skills. SkillGate combines:
 
 1. **Static security scanning** — 600+ rules across 25 categories, detecting hardcoded secrets, dangerous code patterns, and suspicious network calls across 17 programming languages
 2. **SKILL.md quality evaluation** — checking for missing metadata, inconsistent descriptions, and structural issues that confuse agent selection
@@ -60,7 +60,7 @@ Recent work on AI agent safety has focused on:
 - **Prompt injection** — defending against malicious inputs
 - **Tool use safety** — ensuring agents call tools appropriately
 
-However, there has been little work on **evaluating the skills themselves** — the third-party packages that extend agent capabilities. This is the gap SkillGate addresses.
+However, there has been relatively limited work on **evaluating the skills themselves** — the third-party packages that extend agent capabilities. We address this gap with SkillGate.
 
 ### 2.3 The SKILL.md Ecosystem
 
