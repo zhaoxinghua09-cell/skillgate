@@ -1,32 +1,27 @@
-# Security Policy
-
-## Reporting a Vulnerability
-
-If you discover a security vulnerability in SkillGate, please report it responsibly:
-
-1. **Do NOT open a public GitHub issue**
-2. Email: security@skillgate.dev
-3. We will respond within 48 hours
+﻿# Security Policy
 
 ## Supported Versions
 
+We release patches for security vulnerabilities in the latest version of SkillGate.
+
 | Version | Supported |
 |---------|-----------|
-| 4.x | ✅ |
-| 3.x | ❌ |
+| 1.0.x   | ✅ |
 
-## Security Principles
+## Reporting a Vulnerability
 
-SkillGate is built on the **LGD Trust Framework**:
+If you find a security vulnerability in SkillGate, please report it responsibly:
 
-- **Registered**: every scan has a rule version and audit log
-- **Evidenced**: every finding has proof and explanation
-- **Guarded**: every gate is checked automatically
+1. **Do NOT open a public issue**
+2. Email us at: security@example.com
+3. Include as much detail as possible:
+   - Description of the vulnerability
+   - Steps to reproduce
+   - Potential impact
+   - Suggested fix (if you have one)
 
-## Local-First by Design
+We will respond within 48 hours and work with you to understand and fix the issue.
 
-SkillGate runs 100% locally. Your code never leaves your machine.
+## Security Updates
 
----
-
-**© SkillGate Security Team**
+Security fixes will be released as patch versions (e.g., 1.0.1, 1.0.2). We will announce security updates in the Release notes.
