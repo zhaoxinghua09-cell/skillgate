@@ -1,0 +1,50 @@
+﻿============================================================
+  🌐 Skill Ecosystem — 技能生态统一入口
+  📖 方法论：LGD-Evo（自生长生态）
+============================================================
+
+  用法: python ecosystem.py <command>
+
+  命令:
+    registry          打开注册中心（浏览所有 skill）
+    search <query>    搜索 skill
+    scan-all          一键扫描所有 skill
+    run <query>       运行时执行（自动路由 + 执行 + 评测 + 合成）
+    versions          版本管理（看升级历史）
+    deps              依赖管理（看依赖关系）
+    analytics         使用记录（看统计数据）
+    traces            调用日志（看每次调用的详细信息）
+    errors            错误队列（看待重试的任务）
+    cache             上下文缓存（看缓存统计）
+    governance        企业治理（看策略和权限）
+    cost              成本追踪（看时间和预算）
+    monitor           主动监控（检查系统状态）
+    recommend         主动推荐（推荐你可能需要的）
+    watch             文件监控（文件变了自动扫）
+    improve           自动改进（重试失败任务）
+    proactive         一键跑所有主动性功能
+    methodology       查看 LGD-Evo 方法论摘要
+    check-methodology  自检有没有符合 LGD 三律
+    evolve-summary     总结这一圈循环的效果
+    version           显示当前版本号
+    start             一键跑最常用的功能
+    feedback          提交改进建议
+    evolve-10-rounds  总结 10 圈循环的效果
+    cleanup           清理临时文件和缓存
+    health            健康检查（工具有没有问题）
+    web               启动 Web 版
+    medical-recommend <分类>  医械法规推荐（1/2/3/ai）
+    medical-chain <文件> <分类>  医械法规技能链（一键跑全部）
+    medical-watch <目录>     医械文档变化监控
+    perf-test         性能测试（每秒扫多少文件）
+    stress-test       压力测试（连续跑 10 次）
+    red-team          红队测试（模拟攻击）
+    evolve            自我进化诊断（看看哪里能改进）
+    full-cycle        共生循环（扫描→改进→再扫描→再改进，跑 3 圈）
+    help              显示帮助
+
+  示例:
+    python ecosystem.py search medical
+    python ecosystem.py run "帮我检查 21 CFR 引用格式"
+    python ecosystem.py scan-all
+============================================================
