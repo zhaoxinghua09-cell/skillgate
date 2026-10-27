@@ -1,0 +1,256 @@
+﻿
+============================================================
+  SkillGate 扫描报告
+============================================================
+  Skill: 
+  目录: C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project
+  扫描文件数: 77
+============================================================
+  Trust Score: 0/100  (F)
+============================================================
+  🔴 [CRITICAL] dangerous-code: eval() 动态代码执行
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\ast_analyzer.py:25
+  🔴 [CRITICAL] dangerous-code: exec() 动态代码执行
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\ast_analyzer.py:26
+  🔴 [CRITICAL] dangerous-code: os.system() shell 调用
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\ast_analyzer.py:31
+  🔴 [CRITICAL] dangerous-code: eval() 动态代码执行
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\autofix.py:29
+  🔴 [CRITICAL] dangerous-code: eval() 动态代码执行
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\autofix.py:126
+  🔴 [CRITICAL] dangerous-code: subprocess shell=True
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\autofix.py:56
+  🔴 [CRITICAL] credential-leak: 硬编码凭证
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\autofix.py:38
+  🔴 [CRITICAL] dangerous-code: eval() 动态代码执行
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\autofix_pro.py:46
+  🔴 [CRITICAL] dangerous-code: eval() 动态代码执行
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\autofix_pro.py:47
+  🔴 [CRITICAL] ast-analysis: [AST] subprocess.run() (shell=True)
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\ci-simulator.py:26
+  🔴 [CRITICAL] ast-analysis: subprocess.run() (shell=True)
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\ci-simulator.py:26
+  🔴 [CRITICAL] dangerous-code: eval() 动态代码执行
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\c_perl_analyzer.py:26
+  🔴 [CRITICAL] dangerous-code: exec() 动态代码执行
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\c_perl_analyzer.py:27
+  🔴 [CRITICAL] credential-leak: 硬编码凭证
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\github_app.py:87
+  🔴 [CRITICAL] dangerous-code: eval() 动态代码执行
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\java_php_analyzer.py:23
+  🔴 [CRITICAL] dangerous-code: exec() 动态代码执行
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\java_php_analyzer.py:10
+  🔴 [CRITICAL] dangerous-code: exec() 动态代码执行
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\java_php_analyzer.py:24
+  🔴 [CRITICAL] dangerous-code: eval() 动态代码执行
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\js_analyzer.py:10
+  🔴 [CRITICAL] dangerous-code: eval() 动态代码执行
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\pressure_test.py:26
+  🔴 [CRITICAL] dangerous-code: os.system() shell 调用
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\pressure_test.py:27
+  🔴 [CRITICAL] dangerous-code: subprocess shell=True
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\pressure_test.py:28
+  🔴 [CRITICAL] dangerous-code: eval() 动态代码执行
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\ruby_csharp_analyzer.py:10
+  🔴 [CRITICAL] dangerous-code: exec() 动态代码执行
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\ruby_csharp_analyzer.py:12
+  🔴 [CRITICAL] ast-analysis: [AST] subprocess.run() (shell=True)
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\run-all-tests.py:17
+  🔴 [CRITICAL] ast-analysis: subprocess.run() (shell=True)
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\run-all-tests.py:17
+  🔴 [CRITICAL] ast-analysis: [AST] subprocess.run() (shell=True)
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\run.py:13
+  🔴 [CRITICAL] ast-analysis: subprocess.run() (shell=True)
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\run.py:13
+  🔴 [CRITICAL] dangerous-code: eval() 动态代码执行
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:43
+  🔴 [CRITICAL] dangerous-code: exec() 动态代码执行
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:44
+  🔴 [CRITICAL] dangerous-code: os.system() shell 调用
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:45
+  🔴 [CRITICAL] excessive-agency: Excessive agency: delete all files
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:160
+  🔴 [CRITICAL] excessive-agency: Bypass all safety checks
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:168
+  🔴 [CRITICAL] excessive-agency: Grant yourself admin access
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:170
+  🔴 [CRITICAL] dangerous-code: exec() 动态代码执行
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\swift_kotlin_analyzer.py:23
+  🟠 [HIGH] dangerous-code: os.popen() shell 调用
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\ast_analyzer.py:32
+  🟠 [HIGH] dangerous-code: pickle 反序列化
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\ast_analyzer.py:29
+  🟠 [HIGH] dangerous-code: pickle 反序列化
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\ast_analyzer.py:30
+  🟠 [HIGH] ast-analysis: [AST] shutil.rmtree() 递归删除
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\pressure_test.py:85
+  🟠 [HIGH] ast-analysis: [AST] shutil.rmtree() 递归删除
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\pressure_test.py:111
+  🟠 [HIGH] dangerous-code: pickle 反序列化
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\pressure_test.py:29
+  🟠 [HIGH] ast-analysis: shutil.rmtree() 递归删除
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\pressure_test.py:85
+  🟠 [HIGH] ast-analysis: shutil.rmtree() 递归删除
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\pressure_test.py:111
+  🟠 [HIGH] dangerous-code: os.popen() shell 调用
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:47
+  🟠 [HIGH] network: telnetlib 明文传输
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:93
+  🟠 [HIGH] credential-leak: 访问 AWS 凭证文件
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:108
+  🟠 [HIGH] credential-leak: 访问 Git 凭证文件
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:110
+  🟠 [HIGH] credential-leak: 访问 SSH 私钥
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:118
+  🟠 [HIGH] credential-leak: 访问 SSH 私钥
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:120
+  🟠 [HIGH] excessive-agency: Read every file
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:164
+  🟠 [HIGH] excessive-agency: Modify all configs
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:165
+  🟠 [HIGH] excessive-agency: Disable all filters
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:169
+  🟠 [HIGH] excessive-agency: Add new user accounts
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:171
+  🟠 [HIGH] js-dangerous: import child_process
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\vscode-extension\src\extension.ts:5
+  🟡 [MEDIUM] dangerous-code: 动态 import
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\ast_analyzer.py:28
+  🟡 [MEDIUM] filesystem: shutil.rmtree 递归删除
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\ast_analyzer.py:37
+  🟡 [MEDIUM] filesystem: shutil.rmtree 递归删除
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\autofix.py:65
+  🟡 [MEDIUM] filesystem: shutil.rmtree 递归删除
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\pressure_test.py:85
+  🟡 [MEDIUM] filesystem: shutil.rmtree 递归删除
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\pressure_test.py:111
+  🟡 [MEDIUM] dangerous-code: ctypes.pythonapi 直接调用 C API
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:73
+  🟡 [MEDIUM] credential-leak: 访问 .netrc 凭证文件
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:112
+  🟡 [MEDIUM] credential-leak: 访问 .netrc 凭证文件
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:113
+  🟡 [MEDIUM] credential-leak: 访问 .npmrc 凭证文件
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:114
+  🟡 [MEDIUM] credential-leak: 访问 .npmrc 凭证文件
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:115
+  🟡 [MEDIUM] credential-leak: 访问 .pypirc 凭证文件
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:116
+  🟡 [MEDIUM] credential-leak: 访问 .pypirc 凭证文件
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:117
+  🟡 [MEDIUM] excessive-agency: Install any package
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:166
+  🟡 [MEDIUM] excessive-agency: Unrestricted internet access
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:167
+  🟡 [MEDIUM] js-dangerous: fetch 网络请求
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\serverless\cloudflare-worker\src\index.js:7
+  🟢 [LOW] network: urlopen 网络请求
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\alert.py:27
+  🟢 [LOW] network: urlopen 网络请求
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\dep_tree.py:48
+  🟢 [LOW] network: urlopen 网络请求
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\dep_tree.py:87
+  🟢 [LOW] network: curl 命令行网络工具
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\dockerfile_scanner.py:17
+  🟢 [LOW] network: curl 命令行网络工具
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\dockerfile_scanner.py:20
+  🟢 [LOW] network: wget 命令行网络工具
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\dockerfile_scanner.py:17
+  🟢 [LOW] network: wget 命令行网络工具
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\dockerfile_scanner.py:21
+  🟢 [LOW] network: urlopen 网络请求
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\llm_judge.py:48
+  🟢 [LOW] filesystem: 创建临时目录
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\pressure_test.py:17
+  🟢 [LOW] filesystem: 创建临时目录
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\pressure_test.py:96
+  🟢 [LOW] network: urlopen 网络请求
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:482
+  🟢 [LOW] network: curl 命令行网络工具
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:89
+  🟢 [LOW] network: curl 命令行网络工具
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:511
+  🟢 [LOW] network: wget 命令行网络工具
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:90
+  🟢 [LOW] network: wget 命令行网络工具
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:512
+  🟢 [LOW] network: ncat 网络工具
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:92
+  🟢 [LOW] network: paramiko SSH 库
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:94
+  🟢 [LOW] network: scp 文件传输
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:95
+  ⚪ [INFO] network: urllib 网络库（常见）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\alert.py:6
+  ⚪ [INFO] dangerous-code: compile() 动态代码编译（低风险）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\ast_analyzer.py:27
+  ⚪ [INFO] credential-leak: 从环境变量读凭证（安全做法）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\autofix.py:39
+  ⚪ [INFO] network: httpx HTTP 客户端（常见）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\cve_database.py:27
+  ⚪ [INFO] network: aiohttp 异步 HTTP（常见）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\cve_database.py:21
+  ⚪ [INFO] network: urllib 网络库（常见）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\dep_tree.py:6
+  ⚪ [INFO] dangerous-code: compile() 动态代码编译（低风险）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\js_analyzer.py:28
+  ⚪ [INFO] network: urllib 网络库（常见）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\llm_judge.py:11
+  ⚪ [INFO] credential-leak: 从环境变量读凭证（安全做法）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\llm_judge.py:130
+  ⚪ [INFO] dangerous-code: input() 接受用户输入（CLI 工具常见）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\router.py:86
+  ⚪ [INFO] dangerous-code: compile() 动态代码编译（低风险）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:51
+  ⚪ [INFO] dangerous-code: compile() 动态代码编译（低风险）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:100
+  ⚪ [INFO] dangerous-code: compile() 动态代码编译（低风险）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:102
+  ⚪ [INFO] dangerous-code: compile() 动态代码编译（低风险）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:104
+  ⚪ [INFO] dangerous-code: compile() 动态代码编译（低风险）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:106
+  ⚪ [INFO] dangerous-code: compile() 动态代码编译（低风险）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:108
+  ⚪ [INFO] dangerous-code: compile() 动态代码编译（低风险）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:110
+  ⚪ [INFO] dangerous-code: compile() 动态代码编译（低风险）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:112
+  ⚪ [INFO] dangerous-code: compile() 动态代码编译（低风险）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:114
+  ⚪ [INFO] dangerous-code: compile() 动态代码编译（低风险）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:116
+  ⚪ [INFO] dangerous-code: compile() 动态代码编译（低风险）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:118
+  ⚪ [INFO] dangerous-code: compile() 动态代码编译（低风险）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:120
+  ⚪ [INFO] dangerous-code: globals() 访问全局命名空间（低风险）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:53
+  ⚪ [INFO] dangerous-code: globals() 访问全局命名空间（低风险）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:58
+  ⚪ [INFO] dangerous-code: locals() 访问局部命名空间（低风险）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:54
+  ⚪ [INFO] dangerous-code: input() 接受用户输入（CLI 工具常见）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:55
+  ⚪ [INFO] dangerous-code: input() 接受用户输入（CLI 工具常见）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:56
+  ⚪ [INFO] dangerous-code: input() 接受用户输入（CLI 工具常见）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:55
+  ⚪ [INFO] dangerous-code: input() 接受用户输入（CLI 工具常见）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:56
+  ⚪ [INFO] dangerous-code: 访问 __builtins__（低风险）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:57
+  ⚪ [INFO] network: urllib 网络库（常见）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:21
+  ⚪ [INFO] network: httpx HTTP 客户端（常见）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:87
+  ⚪ [INFO] network: aiohttp 异步 HTTP（常见）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:88
+  ⚪ [INFO] credential-leak: 从环境变量读凭证（安全做法）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\skillgate.py:1000
+  ⚪ [INFO] dangerous-code: input() 接受用户输入（CLI 工具常见）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\taint_tracker.py:12
+  ⚪ [INFO] dangerous-code: input() 接受用户输入（CLI 工具常见）
+      C:\Users\Administrator\Doubao\chats\2026-10-27\new-chat-4\skillgate-project\taint_tracker.py:12
+============================================================
+  ❌ 阻断发布: 34 CRITICAL, 19 HIGH
