@@ -479,7 +479,7 @@ def scan_dependencies(skill_path: Path, result: ScanResult):
                 headers={"Content-Type": "application/json"}
             )
 
-            with urllib.request.urlopen(req, timeout=5) as resp:
+            with urllib.request.urlopen(req, timeout=5) as resp:  # nosec B310 - URL is fixed GitHub API, not user input
                 data = json.loads(resp.read())
                 vulns = data.get("vulns", [])
                 if vulns:
@@ -934,7 +934,7 @@ def generate_junit_xml(result: ScanResult) -> str:
 
     # Pretty print
     rough = ET.tostring(testsuites, encoding="unicode")
-    pretty = minidom.parseString(rough).toprettyxml(indent="  ")
+    pretty = minidom.parseString(rough).toprettyxml(indent="  ")  # nosec B318 - XML is self-generated, not untrusted input
     return pretty
 
 
