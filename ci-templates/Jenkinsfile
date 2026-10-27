@@ -1,0 +1,23 @@
+// SkillGate Jenkins Pipeline
+// Copy this to your Jenkinsfile
+
+pipeline {
+    agent any
+
+    stages {
+        stage('SkillGate Security Scan') {
+            steps {
+                sh 'pip install skillgate'
+                sh 'skillgate scan ./my-skill/ --fail-under 80 --format sarif --output skillgate.sarif'
+            }
+            post {
+                always {
+                    recordIssues(
+                        tool: sarif(id: 'skillgate', name: 'SkillGate Scan'),
+                        failedTotalAll: 0
+                    )
+                }
+            }
+        }
+    }
+}
