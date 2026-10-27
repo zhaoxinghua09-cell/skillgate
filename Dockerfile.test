@@ -1,0 +1,19 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# 复制所有测试相关的文件
+COPY tests/ ./tests/
+COPY skillgate.py .
+COPY ast_analyzer.py .
+COPY scorecard.py .
+COPY benchmark.py .
+COPY sbom_generator.py .
+COPY lint.py .
+COPY ci-simulator.py .
+
+# 复制测试 fixtures
+COPY tests/fixtures/ ./tests/fixtures/
+
+# 跑所有测试
+CMD ["python", "ci-simulator.py"]
