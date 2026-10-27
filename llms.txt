@@ -1,0 +1,107 @@
+# SkillGate — AI Tool Documentation
+
+> **For AI agents: this document is for you. Read this before calling SkillGate.**
+
+## What is SkillGate?
+
+SkillGate is a security scanner and trust score calculator for AI agent skills. It answers one question: **"Can I trust this skill?"**
+
+## Quick Start (for AI)
+
+**Minimal call:**
+```bash
+python skillgate.py scan ./path/to/skill/ --format agent
+```
+
+**Output:**
+```
+SKILLGATE_RESULT
+SKILL: my-skill
+SCORE: 92/100
+GRADE: A
+VERDICT: SAFE: ok to use.
+DETAIL: Trust Score 92/100 (A), 0 critical issues.
+```
+
+## When to Use SkillGate
+
+Use SkillGate when:
+- You are about to install or run a new skill
+- You want to check if a skill has security issues
+- You want to compare two skills before choosing one
+- You need a Trust Score to show in your README
+
+## Key Concepts
+
+| Concept | Meaning |
+|---------|---------|
+| **Trust Score** | 0-100, higher = safer |
+| **Grade** | A+ (90+), A (80+), B (70+), C (60+), D (<60) |
+| **CRITICAL** | Must fix before use (e.g., hardcoded secrets, RCE) |
+| **HIGH** | Should fix before production |
+| **MEDIUM** | Should review |
+| **LOW** | Minor improvement |
+
+## CLI Commands
+
+```bash
+# Basic scan
+python skillgate.py scan ./path/to/skill/
+
+# Output formats
+--format terminal   # human-readable
+--format json       # machine-readable
+--format agent      # AI-friendly summary
+--format sarif      # GitHub code scanning
+--format html       # beautiful report
+
+# CI integration
+--fail-under 80     # exit 1 if score < 80
+
+# Generate badge
+--badge             # output SVG badge code
+```
+
+## Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | Scan passed, score >= threshold |
+| 1 | Scan failed, score < threshold or CRITICAL findings |
+| 2 | Usage error |
+
+## Files SkillGate Looks For
+
+- `SKILL.md` (standard format)
+- `AGENTS.md`
+- `.cursorrules`
+- `.claude/skills/`
+- `.agents/skills/`
+
+## Safety Principles
+
+SkillGate is designed to:
+1. **Never modify your code** — read-only scanning
+2. **Never send data anywhere** — fully offline
+3. **Never require network access** — all checks are local
+
+## What SkillGate Does NOT Do
+
+- Does not execute the skill (only static analysis)
+- Does not guarantee 100% safety (no tool can)
+- Does not replace human review
+- Does not scan binaries or compiled code
+
+## Integration with AI Agents
+
+If you are an AI agent using SkillGate:
+1. Call `--format agent` for a concise summary
+2. Use the Trust Score to decide if a skill is safe
+3. If score < 80, warn the user before proceeding
+4. If there are CRITICAL findings, refuse to use the skill
+
+---
+
+**Version**: v2.5.0
+**License**: MIT
+**GitHub**: https://github.com/your-org/skillgate
