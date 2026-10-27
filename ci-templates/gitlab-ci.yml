@@ -1,0 +1,14 @@
+# SkillGate GitLab CI Template
+# Copy this to your .gitlab-ci.yml
+
+skillgate:
+  image: python:3.11-slim
+  script:
+    - pip install skillgate
+    - skillgate scan ./my-skill/ --fail-under 80 --format sarif --output skillgate.sarif
+  artifacts:
+    reports:
+      sast: skillgate.sarif
+  only:
+    - merge_requests
+    - main
