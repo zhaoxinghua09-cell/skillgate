@@ -23,6 +23,22 @@ Open-source security scanner + capability evaluator + continuous monitoring for 
 
 ---
 
+## 🤔 Why I built this
+
+I love AI agent skills. They make Claude Code, Cursor, and Codex so much more powerful.
+
+But there's a problem: **when you install a random skill from the internet, do you actually know what it does?**
+
+Does it read your files? Send your data to a server? Have a hardcoded API key? Run `eval()` on your input?
+
+I tried using Snyk and CodeQL for this, but they're built for regular code — not for skills. Skills have their own patterns: SKILL.md files, scripts that run with your agent's permissions, instructions that tell the agent to do things.
+
+So I built SkillGate. It's a security scanner built **specifically for AI agent skills**. It tells you, in one number: *can I trust this skill?*
+
+This is just the beginning. As the agent ecosystem grows, we're going to need infrastructure like this — the same way we needed npm audit, Snyk, and Dependabot for regular packages.
+
+---
+
 ## 📖 What is SkillGate?
 
 SkillGate is the **first end-to-end trust infrastructure for AI agent skills**. It combines:
