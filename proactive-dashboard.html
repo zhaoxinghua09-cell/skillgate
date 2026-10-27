@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proactive Dashboard — 主动性 Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #58a6ff;
+            margin-bottom: 20px;
+        }
+        .status-card {
+            background: #161b22;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            border-left: 4px solid #238636;
+        }
+        .status-card.warning {
+            border-left-color: #d29922;
+        }
+        .status-card.critical {
+            border-left-color: #da3633;
+        }
+        .status-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .status-message {
+            font-size: 14px;
+            color: #8b949e;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Proactive Dashboard — 主动性 Dashboard</h1>
+
+        <div class="grid">
+            <div class="status-card">
+                <div class="status-title">👀 主动监控</div>
+                <div class="status-message">检查系统状态：错误队列、成功率、成本</div>
+            </div>
+
+            <div class="status-card">
+                <div class="status-title">💡 主动推荐</div>
+                <div class="status-message">从使用历史推断需求，推荐你可能需要的 skill</div>
+            </div>
+
+            <div class="status-card">
+                <div class="status-title">🔮 主动预测</div>
+                <div class="status-message">预测你接下来可能需要什么</div>
+            </div>
+
+            <div class="status-card">
+                <div class="status-title">👁️ 文件监控</div>
+                <div class="status-message">文件变了就自动重新扫描</div>
+            </div>
+
+            <div class="status-card">
+                <div class="status-title">⚡ 主动执行</div>
+                <div class="status-message">自动做维护：重试失败任务、清理缓存、归档 traces</div>
+            </div>
+
+            <div class="status-card">
+                <div class="status-title">🧬 自我进化</div>
+                <div class="status-message">自动分析数据，给出改进建议</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
