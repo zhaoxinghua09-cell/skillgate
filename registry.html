@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Registry — 技能注册中心</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #58a6ff;
+            margin-bottom: 20px;
+        }
+        .search-box {
+            margin-bottom: 20px;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 12px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            font-size: 16px;
+        }
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #161b22;
+            padding: 16px;
+            border-radius: 6px;
+            flex: 1;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #58a6ff;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #8b949e;
+        }
+        .skill-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 16px;
+        }
+        .skill-card {
+            background: #161b22;
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+        }
+        .skill-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #58a6ff;
+            margin-bottom: 8px;
+        }
+        .skill-description {
+            font-size: 14px;
+            color: #8b949e;
+            margin-bottom: 12px;
+        }
+        .skill-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            color: #8b949e;
+            margin-bottom: 12px;
+        }
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge-a-plus {
+            background: #238636;
+            color: white;
+        }
+        .badge-version {
+            background: #30363d;
+            color: #c9d1d9;
+        }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .tag {
+            background: #1f6feb33;
+            color: #58a6ff;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Skill Registry — 技能注册中心</h1>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="搜索 skill...">
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalSkills">-</div>
+                <div class="stat-label">总 Skill 数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalCategories">-</div>
+                <div class="stat-label">分类数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">平均信任分</div>
+            </div>
+        </div>
+
+        <div class="skill-grid" id="skillGrid">
+            <!-- 动态填充 -->
+        </div>
+    </div>
+
+    <script>
+        async function loadRegistry() {
+            const response = await fetch('/api/registry');
+            const data = await response.json();
+
+            document.getElementById('totalSkills').textContent = data.total;
+
+            const categories = new Set(data.skills.map(s => s.category));
+            document.getElementById('totalCategories').textContent = categories.size;
+
+            renderSkills(data.skills);
+        }
+
+        function renderSkills(skills) {
+            const grid = document.getElementById('skillGrid');
+            grid.innerHTML = skills.map(skill => `
+                <div class="skill-card">
+                    <div class="skill-name">${skill.name}</div>
+                    <div class="skill-description">${skill.description}</div>
+                    <div class="skill-meta">
+                        <span class="badge badge-a-plus">${skill.trust_score}/100</span>
+                        <span class="badge badge-version">v${skill.version}</span>
+                        <span>${skill.author}</span>
+                    </div>
+                    <div class="tags">
+                        ${skill.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 搜索功能
+        document.getElementById('searchInput').addEventListener('input', async (e) => {
+            const query = e.target.value.toLowerCase();
+            const response = await fetch('/api/registry');
+            const data = await response.json();
+
+            const filtered = data.skills.filter(skill =>
+                skill.name.toLowerCase().includes(query) ||
+                skill.description.toLowerCase().includes(query) ||
+                skill.tags.some(tag => tag.toLowerCase().includes(query))
+            );
+
+            renderSkills(filtered);
+        });
+
+        // 加载
+        loadRegistry();
+    </script>
+</body>
+</html>
