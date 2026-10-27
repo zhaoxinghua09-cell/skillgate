@@ -8,6 +8,8 @@ Open-source security scanner + capability evaluator + continuous monitoring for 
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![CI](https://github.com/zhaoxinghua09-cell/skillgate/actions/workflows/ci.yml/badge.svg)](https://github.com/zhaoxinghua09-cell/skillgate/actions/workflows/ci.yml)
+[![Codecov](https://codecov.io/gh/zhaoxinghua09-cell/skillgate/branch/main/graph/badge.svg)](https://codecov.io/gh/zhaoxinghua09-cell/skillgate)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 [Features](#-features) · [Quick Start](#-quick-start) · [Documentation](docs/) · [Rule Writing](docs/rules.md) · [Contributing](CONTRIBUTING.md)
