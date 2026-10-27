@@ -1,0 +1,11 @@
+{
+  "2026-10-27": {
+    "total_seconds": 0.11836075782775879,
+    "runs": {
+      "reg-citation-normalizer": {
+        "count": 1,
+        "total_seconds": 0.11836075782775879
+      }
+    }
+  }
+}
