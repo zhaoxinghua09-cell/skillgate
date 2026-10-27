@@ -365,6 +365,17 @@ We love contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 ---
 
+## 🙏 Acknowledgements
+
+SkillGate stands on the shoulders of giants:
+
+- Inspired by **Snyk** and **Dependabot** — but built specifically for AI agent skills
+- Thanks to **CodeQL** and **Semgrep** for showing what static analysis can do
+- Built on the **LGD Trust Framework** (有籍 / 有证 / 有门禁)
+- Thanks to the entire open-source AI agent community for building skills, tools, and the ecosystem we all love
+
+---
+
 <div align="center">
 
 **Made with ❤️ for the open source agent ecosystem.**
