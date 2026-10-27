@@ -1,0 +1,27 @@
+{
+  "name": "skillgate-vscode",
+  "displayName": "SkillGate",
+  "description": "Real-time skill security scanning in VSCode",
+  "version": "0.3.0",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": ["Linters", "Programming Languages", "Other"],
+  "activationEvents": [
+    "onLanguage:markdown",
+    "onLanguage:python"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "skillgate.scan",
+        "title": "SkillGate: Scan Current Skill"
+      },
+      {
+        "command": "skillgate.scanWorkspace",
+        "title": "SkillGate: Scan All Skills in Workspace"
+      }
+    ]
+  }
+}
