@@ -1,0 +1,59 @@
+{
+  "name": "skillgate",
+  "displayName": "SkillGate",
+  "description": "Skill security scanning and trust scoring for AI agent skills",
+  "version": "0.1.0",
+  "publisher": "skillgate",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "skillgate.scanFile",
+        "title": "SkillGate: Scan Current File"
+      },
+      {
+        "command": "skillgate.scanWorkspace",
+        "title": "SkillGate: Scan Workspace"
+      },
+      {
+        "command": "skillgate.showDashboard",
+        "title": "SkillGate: Show Dashboard"
+      }
+    ],
+    "configuration": {
+      "title": "SkillGate",
+      "properties": {
+        "skillgate.path": {
+          "type": "string",
+          "default": "skillgate",
+          "description": "Path to the skillgate executable"
+        },
+        "skillgate.autoScanOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically scan files when they are saved"
+        }
+      }
+    }
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.75.0",
+    "@types/node": "18.x",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  }
+}
