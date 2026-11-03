@@ -157,7 +157,7 @@ python skillgate.py scan ./my-skill/
 🛡️  SkillGate Security Report
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Skill: my-skill
-Trust Score: 92/100
+Trust Score: 93/100
 Grade: A
 
 📊 Findings:
@@ -208,12 +208,12 @@ jobs:
 Add your skill's Trust Score badge to your README:
 
 ```markdown
-[![SkillGate Trust Score](https://img.shields.io/badge/SkillGate-A%20(92/100)-brightgreen)](https://github.com/zhaoxinghua09-cell/skillgate)
+[![SkillGate Trust Score](https://img.shields.io/badge/SkillGate-A%20(93/100)-brightgreen)](https://github.com/zhaoxinghua09-cell/skillgate)
 ```
 
 It looks like this:
 
-[![SkillGate Trust Score](https://img.shields.io/badge/SkillGate-A%20(92/100)-brightgreen)](https://github.com/zhaoxinghua09-cell/skillgate)
+[![SkillGate Trust Score](https://img.shields.io/badge/SkillGate-A%20(93/100)-brightgreen)](https://github.com/zhaoxinghua09-cell/skillgate)
 
 ---
 
@@ -289,7 +289,7 @@ skillgate/
 | Open source | ✅ MIT | ❌ Proprietary | ✅ MIT | ✅ MIT |
 | Free for commercial use | ✅ Yes | ❌ Paid | ✅ Yes | ✅ Yes |
 
-**Why SkillGate?** It's the only tool built specifically for AI agent skills — not just generic code scanning.
+**Why SkillGate?** It focuses on AI agent skills as a distinct software category — purpose-built trust signals (scan → capability evaluation → continuous monitoring → Trust Score) that complement generic code scanners like Snyk and Semgrep.
 
 ---
 
