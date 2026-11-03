@@ -947,17 +947,32 @@ def scan_skill(skill_dir: str) -> ScanResult:
         scan_md_file(md_file, result)
         result.files_scanned += 1
 
-    # Scan data/config text files for dangerous calls (never miss them)
+    # Data/config text files + binary executables are never skipped
     DATA_SUFFIXES = (".yml", ".yaml", ".toml", ".txt", ".json", ".cfg", ".ini",
                      ".xml", ".html", ".csv", ".env")
+    BINARY_SUFFIXES = (".exe", ".dll", ".so", ".dylib", ".jar", ".apk", ".msi",
+                       ".pyc", ".pyo", ".class", ".scr", ".com", ".pif", ".cpl",
+                       ".bin", ".elf", ".wasm", ".dat")
     for data_file in skill_path.rglob("*"):
-        if data_file.suffix.lower() not in DATA_SUFFIXES:
+        if not data_file.is_file():
+            continue
+        suffix = data_file.suffix.lower()
+        if suffix not in DATA_SUFFIXES and suffix not in BINARY_SUFFIXES:
             continue
         if data_file.name == "requirements.txt":
             continue  # handled by scan_dependencies
         if should_exclude(data_file):
             continue
-        scan_data_file(data_file, result)
+        if suffix in BINARY_SUFFIXES:
+            # Cannot statically inspect binaries; surface them for review
+            # instead of silently skipping executable payloads.
+            result.findings.append(Finding(
+                severity="MEDIUM", category="binary-payload",
+                message="Binary executable payload; static analysis cannot inspect its behavior — requires manual/vendor review",
+                file=str(data_file), line=0,
+            ))
+        else:
+            scan_data_file(data_file, result)
         result.files_scanned += 1
 
     # Scan dependencies for known vulnerabilities
@@ -1195,18 +1210,24 @@ def generate_agent_summary(result: ScanResult) -> str:
     grade = result.grade
     name = result.skill_name
 
-    if score >= 90:
+    # Severity-first verdict: serious findings gate any recommendation,
+    # regardless of the numeric score (a scanner must never recommend a
+    # skill that still carries CRITICAL/HIGH findings).
+    if result.critical_count > 0:
+        verdict = "UNSAFE: do not install."
+        detail = f"{result.critical_count} critical finding(s) present."
+    elif result.high_count > 0:
+        verdict = "CAUTION: review before use."
+        detail = f"{result.high_count} high finding(s) present; do not install until resolved."
+    elif score >= 90:
         verdict = "SAFE: ok to use."
         detail = f"Trust Score {score}/100 ({grade}), no critical issues."
     elif score >= 75:
         verdict = "MOSTLY SAFE: usable, minor issues."
         detail = f"Trust Score {score}/100 ({grade}), {result.medium_count} medium findings."
-    elif score >= 60:
-        verdict = "CAUTION: review findings before use."
-        detail = f"Trust Score {score}/100 ({grade}), {result.high_count} high findings."
     else:
-        verdict = "UNSAFE: do not install."
-        detail = f"Trust Score {score}/100 ({grade}), {result.critical_count} critical findings."
+        verdict = "CAUTION: review findings before use."
+        detail = f"Trust Score {score}/100 ({grade})."
 
     lines = [
         f"SKILLGATE_RESULT",
