@@ -9,7 +9,7 @@ from typing import List
 
 # 污点源（用户输入）
 TAINT_SOURCES = {
-    "input",          # input()
+    "input",          # input()  # skillgate: ignore: rule-pattern library (taint rules)
     "sys.argv",       # 命令行参数
     "os.environ",     # 环境变量
     "request.args",   # Web 请求参数

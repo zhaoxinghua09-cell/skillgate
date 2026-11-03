@@ -7,9 +7,9 @@ from typing import List, Tuple
 
 
 RUBY_DANGEROUS_PATTERNS = [
-    (r"\beval\s*\(", "CRITICAL", "eval() 代码执行"),
+    (r"\beval\s*\(", "CRITICAL", "eval() 代码执行"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
     (r"\bsystem\s*\(", "CRITICAL", "system() 执行系统命令"),
-    (r"\bexec\s*\(", "CRITICAL", "exec() 执行系统命令"),
+    (r"\bexec\s*\(", "CRITICAL", "exec() 执行系统命令"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
     (r"\b`\s*\$", "HIGH", "反引号执行 shell 命令"),
     (r"\bIO\.popen\s*\(", "HIGH", "IO.popen 管道执行"),
     (r"\bMarshal\.load\s*\(", "HIGH", "Marshal.load 反序列化"),

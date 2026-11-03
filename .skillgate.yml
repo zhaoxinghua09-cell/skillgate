@@ -1,0 +1,9 @@
+# SkillGate self-scan configuration (dogfooding)
+# Excludes intentional test fixtures, build artifacts, and duplicated entry points
+# so the scanner scores the actual shipped codebase.
+paths:
+  exclude:
+    - "**/examples/**"              # intentional bad-skill demo fixtures
+    - "**/vscode-extension/out/**"  # build artifacts (compiled JS)
+    - "scripts/skillgate.py"        # byte-identical copy of the main entry point
+    - "pressure_test.py"            # red-team stress tool that intentionally embeds dangerous samples

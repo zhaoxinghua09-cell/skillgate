@@ -84,7 +84,7 @@ if __name__ == "__main__":
     app = GitHubApp(
         app_id="123456",
         private_key="-----BEGIN RSA PRIVATE KEY-----...",
-        webhook_secret="your-webhook-secret"
+        webhook_secret="your-webhook-secret"  # skillgate: ignore: example placeholder in demo block (reviewed)
     )
 
     # Simulate a PR event

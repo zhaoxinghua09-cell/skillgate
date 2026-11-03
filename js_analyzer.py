@@ -7,7 +7,7 @@ from typing import List, Tuple
 
 
 JS_DANGEROUS_PATTERNS = [
-    (r"\beval\s*\(", "CRITICAL", "eval() 动态代码执行"),
+    (r"\beval\s*\(", "CRITICAL", "eval() 动态代码执行"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
     (r"\bFunction\s*\(", "CRITICAL", "Function() 构造器动态执行"),
     (r"\bnew\s+Function\s*\(", "CRITICAL", "new Function() 动态执行"),
     (r"\bchild_process\.exec\s*\(", "CRITICAL", "child_process.exec shell 执行"),
@@ -25,7 +25,7 @@ JS_DANGEROUS_PATTERNS = [
 ]
 
 JS_SECRET_PATTERNS = [
-    (re.compile(r"(api[_-]?key|apikey|secret|token|password)\s*[:=]\s*['\"`]([^'\"`]{8,})['\"`]", re.IGNORECASE),
+    (re.compile(r"(api[_-]?key|apikey|secret|token|password)\s*[:=]\s*['\"`]([^'\"`]{8,})['\"`]", re.IGNORECASE),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
      "CRITICAL", "硬编码凭证"),
 ]
 

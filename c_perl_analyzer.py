@@ -23,8 +23,8 @@ C_DANGEROUS_PATTERNS = [
 ]
 
 PERL_DANGEROUS_PATTERNS = [
-    (r"\beval\s*\(", "CRITICAL", "eval() 代码执行"),
-    (r"\bexec\s*\(", "CRITICAL", "exec() 执行系统命令"),
+    (r"\beval\s*\(", "CRITICAL", "eval() 代码执行"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
+    (r"\bexec\s*\(", "CRITICAL", "exec() 执行系统命令"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
     (r"\bsystem\s*\(", "CRITICAL", "system() 执行系统命令"),
     (r"\b`[^`]*\$", "HIGH", "反引号执行 shell 命令"),
     (r"\bopen\s*\([^)]*\|\s*$", "HIGH", "open 管道模式"),

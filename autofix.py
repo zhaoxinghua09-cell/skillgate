@@ -26,7 +26,7 @@ def generate_fix(finding_category: str, finding_message: str, file: str, line: i
             finding_message=finding_message,
             file=file, line=line,
             fix_description="替换 eval/exec 为安全的替代方案",
-            code_snippet_before="result = eval(user_input)",
+            code_snippet_before="result = eval(user_input)",  # skillgate: ignore: fix-suggestion example strings (reviewed)
             code_snippet_after="result = ast.literal_eval(user_input)",
             confidence=0.9
         ),
@@ -35,8 +35,8 @@ def generate_fix(finding_category: str, finding_message: str, file: str, line: i
             finding_message=finding_message,
             file=file, line=line,
             fix_description="硬编码凭证改用环境变量",
-            code_snippet_before='API_KEY = "sk-1234567890abcdef"',
-            code_snippet_after='API_KEY = os.getenv("API_KEY")',
+            code_snippet_before='API_KEY = "sk-1234567890abcdef"',  # skillgate: ignore: fix-suggestion example strings (reviewed)
+            code_snippet_after='API_KEY = os.getenv("API_KEY")',  # skillgate: ignore: fix-suggestion example strings (reviewed)
             confidence=0.95
         ),
         "prompt-injection": FixSuggestion(
@@ -53,7 +53,7 @@ def generate_fix(finding_category: str, finding_message: str, file: str, line: i
             finding_message=finding_message,
             file=file, line=line,
             fix_description="避免 shell=True，用列表参数",
-            code_snippet_before='subprocess.run("ls -la", shell=True)',
+            code_snippet_before='subprocess.run("ls -la", shell=True)',  # skillgate: ignore: fix-suggestion example strings (reviewed)
             code_snippet_after='subprocess.run(["ls", "-la"])',
             confidence=0.95
         ),
@@ -62,7 +62,7 @@ def generate_fix(finding_category: str, finding_message: str, file: str, line: i
             finding_message=finding_message,
             file=file, line=line,
             fix_description="加路径白名单检查",
-            code_snippet_before="shutil.rmtree(path)",
+            code_snippet_before="shutil.rmtree(path)",  # skillgate: ignore: fix-suggestion example strings (reviewed)
             code_snippet_after='if not path.startswith("/safe/dir/"):\n    raise ValueError("Unsafe path")\nshutil.rmtree(path)',
             confidence=0.8
         ),
@@ -123,7 +123,7 @@ def generate_pr_description(skill_name: str, findings: list, fixes: list[FixSugg
 
 if __name__ == "__main__":
     # Demo
-    fix = generate_fix("dangerous-code", "eval() 动态代码执行", "script.py", 42)
+    fix = generate_fix("dangerous-code", "eval() 动态代码执行", "script.py", 42)  # skillgate: ignore: fix-suggestion example strings (reviewed)
     print(f"Fix: {fix.fix_description}")
     print(f"Before: {fix.code_snippet_before}")
     print(f"After: {fix.code_snippet_after}")

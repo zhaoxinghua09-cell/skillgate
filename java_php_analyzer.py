@@ -7,7 +7,7 @@ from typing import List, Tuple
 
 
 JAVA_DANGEROUS_PATTERNS = [
-    (r"\bRuntime\.getRuntime\(\)\.exec\s*\(", "CRITICAL", "Runtime.exec() 执行系统命令"),
+    (r"\bRuntime\.getRuntime\(\)\.exec\s*\(", "CRITICAL", "Runtime.exec() 执行系统命令"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
     (r"\bProcessBuilder\s*\(", "HIGH", "ProcessBuilder 子进程"),
     (r"\bSystem\.getenv\s*\(", "LOW", "System.getenv 读取环境变量"),
     (r"\bClass\.forName\s*\(", "MEDIUM", "Class.forName 动态加载类"),
@@ -20,8 +20,8 @@ JAVA_DANGEROUS_PATTERNS = [
 ]
 
 PHP_DANGEROUS_PATTERNS = [
-    (r"\beval\s*\(", "CRITICAL", "eval() 代码执行"),
-    (r"\bexec\s*\(", "CRITICAL", "exec() 执行系统命令"),
+    (r"\beval\s*\(", "CRITICAL", "eval() 代码执行"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
+    (r"\bexec\s*\(", "CRITICAL", "exec() 执行系统命令"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
     (r"\bsystem\s*\(", "CRITICAL", "system() 执行系统命令"),
     (r"\bshell_exec\s*\(", "CRITICAL", "shell_exec() 执行系统命令"),
     (r"\bpassthru\s*\(", "CRITICAL", "passthru() 执行系统命令"),

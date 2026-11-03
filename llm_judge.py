@@ -127,7 +127,7 @@ def run_judge_suite(skill_name: str, test_cases: list[dict], api_key: str,
 if __name__ == "__main__":
     # Demo (needs API key)
     import os
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("OPENAI_API_KEY")  # skillgate: ignore: rule-pattern library / reviewed strings
     if not api_key:
         print("Set OPENAI_API_KEY to run demo")
         exit(0)

@@ -14,11 +14,11 @@ DOCKERFILE_PATTERNS = [
     (r"^RUN\s+apt-get\s+install.*--no-install-recommends", "LOW", "缺少 --no-install-recommends"),
     (r"^EXPOSE\s+22", "MEDIUM", "暴露 SSH 端口"),
     (r"^EXPOSE\s+0\.0\.0\.0:", "MEDIUM", "绑定到所有网络接口"),
-    (r"^ADD\s+https?://", "MEDIUM", "ADD 远程 URL（应该用 curl/wget + 删除）"),
+    (r"^ADD\s+https?://", "MEDIUM", "ADD 远程 URL（应该用 curl/wget + 删除）"),  # skillgate: ignore: rule-pattern keyword line (verified false positive)
     (r"^COPY\s+--from=.*latest", "MEDIUM", "多阶段构建用了 latest tag"),
     (r"^RUN\s+pip\s+install.*--trusted-host", "HIGH", "pip 禁用 HTTPS 验证"),
-    (r"^RUN\s+curl\s+.*\|\s*sh", "CRITICAL", "curl | sh 管道执行"),
-    (r"^RUN\s+wget\s+.*\|\s*bash", "CRITICAL", "wget | bash 管道执行"),
+    (r"^RUN\s+curl\s+.*\|\s*sh", "CRITICAL", "curl | sh 管道执行"),  # skillgate: ignore: rule-pattern keyword line (verified false positive)
+    (r"^RUN\s+wget\s+.*\|\s*bash", "CRITICAL", "wget | bash 管道执行"),  # skillgate: ignore: rule-pattern keyword line (verified false positive)
 ]
 
 

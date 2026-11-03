@@ -22,19 +22,19 @@ class DangerousCallVisitor(ast.NodeVisitor):
     """Visit all function calls and flag dangerous ones."""
 
     DANGEROUS_CALLS = {
-        "eval": ("CRITICAL", "eval() 动态代码执行"),
-        "exec": ("CRITICAL", "exec() 动态代码执行"),
-        "compile": ("MEDIUM", "compile() 动态代码编译"),
-        "__import__": ("MEDIUM", "__import__() 动态导入"),
-        "pickle.load": ("HIGH", "pickle.load() 反序列化"),
-        "pickle.loads": ("HIGH", "pickle.loads() 反序列化"),
-        "os.system": ("CRITICAL", "os.system() shell 调用"),
-        "os.popen": ("HIGH", "os.popen() shell 调用"),
+        "eval": ("CRITICAL", "eval() 动态代码执行"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
+        "exec": ("CRITICAL", "exec() 动态代码执行"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
+        "compile": ("MEDIUM", "compile() 动态代码编译"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
+        "__import__": ("MEDIUM", "__import__() 动态导入"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
+        "pickle.load": ("HIGH", "pickle.load() 反序列化"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
+        "pickle.loads": ("HIGH", "pickle.loads() 反序列化"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
+        "os.system": ("CRITICAL", "os.system() shell 调用"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
+        "os.popen": ("HIGH", "os.popen() shell 调用"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
         "subprocess.call": ("HIGH", "subprocess.call()"),
         "subprocess.run": ("HIGH", "subprocess.run()"),
         "subprocess.Popen": ("HIGH", "subprocess.Popen()"),
         "subprocess.check_output": ("HIGH", "subprocess.check_output()"),
-        "shutil.rmtree": ("HIGH", "shutil.rmtree() 递归删除"),
+        "shutil.rmtree": ("HIGH", "shutil.rmtree() 递归删除"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
     }
 
     def __init__(self):

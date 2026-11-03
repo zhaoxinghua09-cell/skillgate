@@ -20,7 +20,7 @@ SWIFT_DANGEROUS_PATTERNS = [
 ]
 
 KOTLIN_DANGEROUS_PATTERNS = [
-    (r"\bRuntime\.getRuntime\(\)\.exec\b", "CRITICAL", "Runtime.exec() 执行系统命令"),
+    (r"\bRuntime\.getRuntime\(\)\.exec\b", "CRITICAL", "Runtime.exec() 执行系统命令"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
     (r"\bProcessBuilder\b", "HIGH", "ProcessBuilder 子进程"),
     (r"\bSystem\.getenv\b", "LOW", "System.getenv 读取环境变量"),
     (r"\bClass\.forName\b", "MEDIUM", "Class.forName 动态加载"),

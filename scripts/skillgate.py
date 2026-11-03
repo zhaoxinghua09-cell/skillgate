@@ -40,22 +40,22 @@ except ImportError:
 
 # 1. Dangerous code execution
 DANGEROUS_CODE_PATTERNS = [
-    (r"\beval\s*\(", "MEDIUM", "eval() 动态代码执行（工具常用，需人工判断）"),
-    (r"\bexec\s*\(", "MEDIUM", "exec() 动态代码执行（工具常用，需人工判断）"),
-    (r"\bos\.system\s*\(", "HIGH", "os.system() shell 调用"),
+    (r"\beval\s*\(", "MEDIUM", "eval() 动态代码执行（工具常用，需人工判断）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"\bexec\s*\(", "MEDIUM", "exec() 动态代码执行（工具常用，需人工判断）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"\bos\.system\s*\(", "HIGH", "os.system() shell 调用"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
     (r"\bsubprocess\.(run|call|Popen|check_output)\s*\([^)]*shell\s*=\s*True", "HIGH", "subprocess shell=True"),
-    (r"\bos\.popen\s*\(", "HIGH", "os.popen() shell 调用"),
+    (r"\bos\.popen\s*\(", "HIGH", "os.popen() shell 调用"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
     (r"\b__import__\s*\(", "MEDIUM", "动态 import"),
     (r"\bpickle\.load(s)?\s*\(", "HIGH", "pickle 反序列化"),
     (r"\byaml\.load\s*\([^)]*\)(?![^#]*Loader\s*=\s*SafeLoader)", "MEDIUM", "yaml.load 非安全加载"),
-    (r"\bcompile\s*\([^)]*\)", "INFO", "compile() 动态代码编译（低风险）"),
+    (r"\bcompile\s*\([^)]*\)", "INFO", "compile() 动态代码编译（低风险）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
     (r"\bgetattr\s*\([^)]*os\.", "MEDIUM", "getattr 动态调用 os 模块"),
-    (r"\bglobals\(\)", "INFO", "globals() 访问全局命名空间（低风险）"),
-    (r"\blocals\(\)", "INFO", "locals() 访问局部命名空间（低风险）"),
-    (r"\binput\s*\(\)", "INFO", "input() 接受用户输入（CLI 工具常见）"),
-    (r"\binput\s*\([^)]*\)", "INFO", "input() 接受用户输入（CLI 工具常见）"),
-    (r"\b__builtins__\b", "INFO", "访问 __builtins__（低风险）"),
-    (r"\bglobals\(\)\[", "MEDIUM", "globals() 动态修改"),
+    (r"\bglobals\(\)", "INFO", "globals() 访问全局命名空间（低风险）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"\blocals\(\)", "INFO", "locals() 访问局部命名空间（低风险）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"\binput\s*\(\)", "INFO", "input() 接受用户输入（CLI 工具常见）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"\binput\s*\([^)]*\)", "INFO", "input() 接受用户输入（CLI 工具常见）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"\b__builtins__\b", "INFO", "访问 __builtins__（低风险）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"\bglobals\(\)\[", "MEDIUM", "globals() 动态修改"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
     (r"\bsetattr\s*\(", "INFO", "setattr 动态属性设置（低风险）"),
     (r"\bdelattr\s*\(", "INFO", "delattr 动态属性删除（低风险）"),
     # === 新增规则 ===
@@ -70,7 +70,7 @@ DANGEROUS_CODE_PATTERNS = [
     (r"\bctypes\.windll\s*\(", "HIGH", "ctypes 加载 Windows DLL"),
     (r"\bctypes\.oledll\s*\(", "HIGH", "ctypes 加载 OLE DLL"),
     (r"\bdl\.open\s*\(", "HIGH", "dlopen 加载动态库"),
-    (r"\bctypes\.pythonapi\b", "MEDIUM", "ctypes.pythonapi 直接调用 C API"),
+    (r"\bctypes\.pythonapi\b", "MEDIUM", "ctypes.pythonapi 直接调用 C API"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
 ]
 
 # 2. Network calls / data exfiltration
@@ -90,34 +90,34 @@ NETWORK_PATTERNS = [
     (r"\bwget\b", "LOW", "wget 命令行网络工具"),
     (r"\bnc\s+-[el]\b", "HIGH", "netcat 反向 shell 风险"),
     (r"\bncat\b", "LOW", "ncat 网络工具"),
-    (r"\btelnetlib\b", "HIGH", "telnetlib 明文传输"),
+    (r"\btelnetlib\b", "HIGH", "telnetlib 明文传输"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
     (r"\bparamiko\b", "LOW", "paramiko SSH 库"),
     (r"\bscp\b", "LOW", "scp 文件传输"),
 ]
 
 # 3. Credential / secret access
 CREDENTIAL_PATTERNS = [
-    (re.compile(r"(api[_-]?key|apikey|secret|token|password|passwd|credential)\s*[:=]\s*['\"]([^'\"]{8,})['\"]", re.IGNORECASE),
+    (re.compile(r"(api[_-]?key|apikey|secret|token|password|passwd|credential)\s*[:=]\s*['\"]([^'\"]{8,})['\"]", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
      "CRITICAL", "硬编码凭证"),
-    (re.compile(r"os\.environ\[['\"](.*TOKEN|.*KEY|.*SECRET|.*PASSWORD)['\"]\]", re.IGNORECASE),
+    (re.compile(r"os\.environ\[['\"](.*TOKEN|.*KEY|.*SECRET|.*PASSWORD)['\"]\]", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
      "INFO", "从环境变量读凭证（安全做法）"),
-    (re.compile(r"os\.getenv\s*\(\s*['\"](.*TOKEN|.*KEY|.*SECRET|.*PASSWORD)", re.IGNORECASE),
+    (re.compile(r"os\.getenv\s*\(\s*['\"](.*TOKEN|.*KEY|.*SECRET|.*PASSWORD)", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
      "INFO", "从环境变量读凭证（安全做法）"),
-    (re.compile(r"~\.ssh/", re.IGNORECASE),
+    (re.compile(r"~\.ssh/", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
      "HIGH", "访问 SSH 密钥目录"),
-    (re.compile(r"\.aws/credentials", re.IGNORECASE),
+    (re.compile(r"\.aws/credentials", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
      "HIGH", "访问 AWS 凭证文件"),
-    (re.compile(r"\.git-credentials", re.IGNORECASE),
+    (re.compile(r"\.git-credentials", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
      "HIGH", "访问 Git 凭证文件"),
-    (re.compile(r"\.netrc", re.IGNORECASE),
-     "MEDIUM", "访问 .netrc 凭证文件"),
-    (re.compile(r"\.npmrc", re.IGNORECASE),
-     "MEDIUM", "访问 .npmrc 凭证文件"),
-    (re.compile(r"\.pypirc", re.IGNORECASE),
-     "MEDIUM", "访问 .pypirc 凭证文件"),
-    (re.compile(r"id_rsa", re.IGNORECASE),
+    (re.compile(r"\.netrc", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+     "MEDIUM", "访问 .netrc 凭证文件"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (re.compile(r"\.npmrc", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+     "MEDIUM", "访问 .npmrc 凭证文件"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (re.compile(r"\.pypirc", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+     "MEDIUM", "访问 .pypirc 凭证文件"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (re.compile(r"id_rsa", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
      "HIGH", "访问 SSH 私钥"),
-    (re.compile(r"id_ed25519", re.IGNORECASE),
+    (re.compile(r"id_ed25519", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
      "HIGH", "访问 SSH 私钥"),
 ]
 
@@ -157,18 +157,18 @@ PROMPT_INJECTION_PATTERNS = [
 
 # 6. Excessive agency / MCP risks
 EXCESSIVE_AGENCY_PATTERNS = [
-    (r"delete\s+all\s+files", "CRITICAL", "Excessive agency: delete all files"),
+    (r"delete\s+all\s+files", "CRITICAL", "Excessive agency: delete all files"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
     (r"send\s+all\s+data", "HIGH", "Excessive agency: exfiltrate all data"),
     (r"run\s+arbitrary\s+commands", "HIGH", "Arbitrary command execution"),
     (r"access\s+all\s+files", "MEDIUM", "Overly broad file access"),
-    (r"read\s+every\s+file", "HIGH", "Read every file"),
-    (r"modify\s+all\s+configs", "HIGH", "Modify all configs"),
-    (r"install\s+any\s+package", "MEDIUM", "Install any package"),
-    (r"unrestricted\s+internet\s+access", "MEDIUM", "Unrestricted internet access"),
-    (r"bypass\s+all\s+safety\s+checks", "CRITICAL", "Bypass all safety checks"),
-    (r"disable\s+all\s+filters", "HIGH", "Disable all filters"),
-    (r"grant\s+yourself\s+admin", "CRITICAL", "Grant yourself admin access"),
-    (r"add\s+new\s+user\s+accounts", "HIGH", "Add new user accounts"),
+    (r"read\s+every\s+file", "HIGH", "Read every file"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"modify\s+all\s+configs", "HIGH", "Modify all configs"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"install\s+any\s+package", "MEDIUM", "Install any package"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"unrestricted\s+internet\s+access", "MEDIUM", "Unrestricted internet access"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"bypass\s+all\s+safety\s+checks", "CRITICAL", "Bypass all safety checks"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"disable\s+all\s+filters", "HIGH", "Disable all filters"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"grant\s+yourself\s+admin", "CRITICAL", "Grant yourself admin access"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"add\s+new\s+user\s+accounts", "HIGH", "Add new user accounts"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
 ]
 
 # 7. License compliance

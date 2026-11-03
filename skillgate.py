@@ -36,26 +36,91 @@ except ImportError:
     scan_js_file = None
 
 
+# ── Config (.skillgate.yml) support ─────────────────────────────────────────
+def _glob_to_regex(pattern: str) -> str:
+    """Convert a simple glob (with `**` support) to a regex string."""
+    pat = pattern.replace('\\', '/').lstrip('./')
+    out = []
+    i = 0
+    n = len(pat)
+    while i < n:
+        c = pat[i]
+        if c == '*':
+            if i + 1 < n and pat[i + 1] == '*':
+                out.append('.*')
+                i += 2
+                if i < n and pat[i] == '/':
+                    out.append('/?')
+                    i += 1
+            else:
+                out.append('[^/]*')
+                i += 1
+        elif c == '?':
+            out.append('[^/]')
+            i += 1
+        else:
+            out.append(re.escape(c))
+            i += 1
+    return '^' + ''.join(out) + '$'
+
+
+def load_config_excludes(skill_path: Path) -> list:
+    """Parse paths.exclude from .skillgate.yml / .skillgate.yaml.
+
+    Zero-dependency minimal parser (no PyYAML): it only needs the exclude list.
+    The first existing config file wins.
+    """
+    excludes = []
+    for cfg_name in ('.skillgate.yml', '.skillgate.yaml'):
+        cfg = skill_path / cfg_name
+        if not cfg.exists():
+            continue
+        try:
+            in_exclude = False
+            for raw in cfg.read_text(encoding='utf-8', errors='replace').splitlines():
+                line = raw.strip()
+                if not line or line.startswith('#'):
+                    continue
+                if line.startswith('exclude:'):
+                    in_exclude = True
+                    continue
+                if in_exclude:
+                    if line.startswith('-'):
+                        item = line.lstrip('-').strip()
+                        # strip inline comments, then surrounding quotes
+                        if '#' in item:
+                            item = item.split('#', 1)[0].strip()
+                        item = item.strip('"').strip("'").strip()
+                        if item:
+                            excludes.append(item)
+                    elif line and not line.startswith('.'):
+                        in_exclude = False
+        except Exception:
+            pass
+        break
+    return excludes
+
+
 # ── Check patterns ──────────────────────────────────────────────────────────
 
 # 1. Dangerous code execution
 DANGEROUS_CODE_PATTERNS = [
-    (r"\beval\s*\(", "MEDIUM", "eval() 动态代码执行（工具常用，需人工判断）"),
-    (r"\bexec\s*\(", "MEDIUM", "exec() 动态代码执行（工具常用，需人工判断）"),
-    (r"\bos\.system\s*\(", "HIGH", "os.system() shell 调用"),
+    (r"\beval\s*\(", "MEDIUM", "eval() 动态代码执行（工具常用，需人工判断）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"\bexec\s*\(", "MEDIUM", "exec() 动态代码执行（工具常用，需人工判断）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"\bos\.system\s*\(", "HIGH", "os.system() shell 调用"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
     (r"\bsubprocess\.(run|call|Popen|check_output)\s*\([^)]*shell\s*=\s*True", "HIGH", "subprocess shell=True"),
-    (r"\bos\.popen\s*\(", "HIGH", "os.popen() shell 调用"),
+    (r"\bos\.popen\s*\(", "HIGH", "os.popen() shell 调用"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
     (r"\b__import__\s*\(", "MEDIUM", "动态 import"),
     (r"\bpickle\.load(s)?\s*\(", "HIGH", "pickle 反序列化"),
     (r"\byaml\.load\s*\([^)]*\)(?![^#]*Loader\s*=\s*SafeLoader)", "MEDIUM", "yaml.load 非安全加载"),
-    (r"\bcompile\s*\([^)]*\)", "INFO", "compile() 动态代码编译（低风险）"),
+    (r"\bcompile\s*\([^)]*\)", "INFO", "compile() 动态代码编译（低风险）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
     (r"\bgetattr\s*\([^)]*os\.", "MEDIUM", "getattr 动态调用 os 模块"),
-    (r"\bglobals\(\)", "INFO", "globals() 访问全局命名空间（低风险）"),
-    (r"\blocals\(\)", "INFO", "locals() 访问局部命名空间（低风险）"),
-    (r"\binput\s*\(\)", "INFO", "input() 接受用户输入（CLI 工具常见）"),
-    (r"\binput\s*\([^)]*\)", "INFO", "input() 接受用户输入（CLI 工具常见）"),
-    (r"\b__builtins__\b", "INFO", "访问 __builtins__（低风险）"),
-    (r"\bglobals\(\)\[", "MEDIUM", "globals() 动态修改"),
+    (r"\bglobals\(\)", "INFO", "globals() 访问全局命名空间（低风险）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"\blocals\(\)", "INFO", "locals() 访问局部命名空间（低风险）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"\binput\s*\(\)", "INFO", "input() 接受用户输入（CLI 工具常见）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"\binput\s*\([^)]*\)", "INFO", "input() 接受用户输入（CLI 工具常见）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"\b__builtins__\b", "INFO", "访问 __builtins__（低风险）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"\bglobals\(\)\[", "MEDIUM", "globals() 动态修改"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
     (r"\bsetattr\s*\(", "INFO", "setattr 动态属性设置（低风险）"),
     (r"\bdelattr\s*\(", "INFO", "delattr 动态属性删除（低风险）"),
     # === 新增规则 ===
@@ -70,7 +135,7 @@ DANGEROUS_CODE_PATTERNS = [
     (r"\bctypes\.windll\s*\(", "HIGH", "ctypes 加载 Windows DLL"),
     (r"\bctypes\.oledll\s*\(", "HIGH", "ctypes 加载 OLE DLL"),
     (r"\bdl\.open\s*\(", "HIGH", "dlopen 加载动态库"),
-    (r"\bctypes\.pythonapi\b", "MEDIUM", "ctypes.pythonapi 直接调用 C API"),
+    (r"\bctypes\.pythonapi\b", "MEDIUM", "ctypes.pythonapi 直接调用 C API"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
 ]
 
 # 2. Network calls / data exfiltration
@@ -86,38 +151,38 @@ NETWORK_PATTERNS = [
     (r"\bpost\s*\([^)]*https?://", "MEDIUM", "POST 数据到外部 URL"),
     (r"\bhttpx\b", "INFO", "httpx HTTP 客户端（常见）"),
     (r"\baiohttp\b", "INFO", "aiohttp 异步 HTTP（常见）"),
-    (r"\bcurl\b", "LOW", "curl 命令行网络工具"),
-    (r"\bwget\b", "LOW", "wget 命令行网络工具"),
+    (r"\bcurl\b", "LOW", "curl 命令行网络工具"),  # skillgate: ignore: rule-pattern keyword line (verified false positive)
+    (r"\bwget\b", "LOW", "wget 命令行网络工具"),  # skillgate: ignore: rule-pattern keyword line (verified false positive)
     (r"\bnc\s+-[el]\b", "HIGH", "netcat 反向 shell 风险"),
-    (r"\bncat\b", "LOW", "ncat 网络工具"),
-    (r"\btelnetlib\b", "HIGH", "telnetlib 明文传输"),
+    (r"\bncat\b", "LOW", "ncat 网络工具"),  # skillgate: ignore: rule-pattern keyword line (verified false positive)
+    (r"\btelnetlib\b", "HIGH", "telnetlib 明文传输"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
     (r"\bparamiko\b", "LOW", "paramiko SSH 库"),
-    (r"\bscp\b", "LOW", "scp 文件传输"),
+    (r"\bscp\b", "LOW", "scp 文件传输"),  # skillgate: ignore: rule-pattern keyword line (verified false positive)
 ]
 
 # 3. Credential / secret access
 CREDENTIAL_PATTERNS = [
-    (re.compile(r"(api[_-]?key|apikey|secret|token|password|passwd|credential)\s*[:=]\s*['\"]([^'\"]{8,})['\"]", re.IGNORECASE),
+    (re.compile(r"(api[_-]?key|apikey|secret|token|password|passwd|credential)\s*[:=]\s*['\"]([^'\"]{8,})['\"]", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
      "CRITICAL", "硬编码凭证"),
-    (re.compile(r"os\.environ\[['\"](.*TOKEN|.*KEY|.*SECRET|.*PASSWORD)['\"]\]", re.IGNORECASE),
+    (re.compile(r"os\.environ\[['\"](.*TOKEN|.*KEY|.*SECRET|.*PASSWORD)['\"]\]", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
      "INFO", "从环境变量读凭证（安全做法）"),
-    (re.compile(r"os\.getenv\s*\(\s*['\"](.*TOKEN|.*KEY|.*SECRET|.*PASSWORD)", re.IGNORECASE),
+    (re.compile(r"os\.getenv\s*\(\s*['\"](.*TOKEN|.*KEY|.*SECRET|.*PASSWORD)", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
      "INFO", "从环境变量读凭证（安全做法）"),
-    (re.compile(r"~\.ssh/", re.IGNORECASE),
+    (re.compile(r"~\.ssh/", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
      "HIGH", "访问 SSH 密钥目录"),
-    (re.compile(r"\.aws/credentials", re.IGNORECASE),
+    (re.compile(r"\.aws/credentials", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
      "HIGH", "访问 AWS 凭证文件"),
-    (re.compile(r"\.git-credentials", re.IGNORECASE),
+    (re.compile(r"\.git-credentials", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
      "HIGH", "访问 Git 凭证文件"),
-    (re.compile(r"\.netrc", re.IGNORECASE),
-     "MEDIUM", "访问 .netrc 凭证文件"),
-    (re.compile(r"\.npmrc", re.IGNORECASE),
-     "MEDIUM", "访问 .npmrc 凭证文件"),
-    (re.compile(r"\.pypirc", re.IGNORECASE),
-     "MEDIUM", "访问 .pypirc 凭证文件"),
-    (re.compile(r"id_rsa", re.IGNORECASE),
+    (re.compile(r"\.netrc", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+     "MEDIUM", "访问 .netrc 凭证文件"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (re.compile(r"\.npmrc", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+     "MEDIUM", "访问 .npmrc 凭证文件"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (re.compile(r"\.pypirc", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+     "MEDIUM", "访问 .pypirc 凭证文件"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (re.compile(r"id_rsa", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
      "HIGH", "访问 SSH 私钥"),
-    (re.compile(r"id_ed25519", re.IGNORECASE),
+    (re.compile(r"id_ed25519", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
      "HIGH", "访问 SSH 私钥"),
 ]
 
@@ -157,18 +222,18 @@ PROMPT_INJECTION_PATTERNS = [
 
 # 6. Excessive agency / MCP risks
 EXCESSIVE_AGENCY_PATTERNS = [
-    (r"delete\s+all\s+files", "CRITICAL", "Excessive agency: delete all files"),
+    (r"delete\s+all\s+files", "CRITICAL", "Excessive agency: delete all files"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
     (r"send\s+all\s+data", "HIGH", "Excessive agency: exfiltrate all data"),
     (r"run\s+arbitrary\s+commands", "HIGH", "Arbitrary command execution"),
     (r"access\s+all\s+files", "MEDIUM", "Overly broad file access"),
-    (r"read\s+every\s+file", "HIGH", "Read every file"),
-    (r"modify\s+all\s+configs", "HIGH", "Modify all configs"),
-    (r"install\s+any\s+package", "MEDIUM", "Install any package"),
-    (r"unrestricted\s+internet\s+access", "MEDIUM", "Unrestricted internet access"),
-    (r"bypass\s+all\s+safety\s+checks", "CRITICAL", "Bypass all safety checks"),
-    (r"disable\s+all\s+filters", "HIGH", "Disable all filters"),
-    (r"grant\s+yourself\s+admin", "CRITICAL", "Grant yourself admin access"),
-    (r"add\s+new\s+user\s+accounts", "HIGH", "Add new user accounts"),
+    (r"read\s+every\s+file", "HIGH", "Read every file"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"modify\s+all\s+configs", "HIGH", "Modify all configs"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"install\s+any\s+package", "MEDIUM", "Install any package"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"unrestricted\s+internet\s+access", "MEDIUM", "Unrestricted internet access"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"bypass\s+all\s+safety\s+checks", "CRITICAL", "Bypass all safety checks"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"disable\s+all\s+filters", "HIGH", "Disable all filters"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"grant\s+yourself\s+admin", "CRITICAL", "Grant yourself admin access"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"add\s+new\s+user\s+accounts", "HIGH", "Add new user accounts"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
 ]
 
 # 7. License compliance
@@ -726,11 +791,23 @@ def scan_skill(skill_dir: str) -> ScanResult:
     # Default excluded directories
     DEFAULT_EXCLUDES = {"tests", "test", "docs", "doc", ".git", "__pycache__", "node_modules"}
 
+    # Config-driven excludes (.skillgate.yml paths.exclude), with ** glob support
+    _config_excludes = []
+    for _pat in load_config_excludes(skill_path):
+        try:
+            _config_excludes.append(re.compile(_glob_to_regex(_pat)))
+        except Exception:
+            pass
+
     def should_exclude(filepath: Path) -> bool:
         """Check if a file should be excluded from scanning."""
         parts = filepath.relative_to(skill_path).parts
         for part in parts:
             if part in DEFAULT_EXCLUDES:
+                return True
+        rel_posix = filepath.relative_to(skill_path).as_posix()
+        for _rx in _config_excludes:
+            if _rx.match(rel_posix):
                 return True
         return False
 
@@ -796,6 +873,32 @@ def scan_skill(skill_dir: str) -> ScanResult:
 
     # Scan dependencies for known vulnerabilities
     scan_dependencies(skill_path, result)
+
+    # Post-filter: apply line-level `# skillgate: ignore` suppression uniformly
+    # across ALL detectors (dangerous-code, credential-leak, ast-analysis,
+    # excessive-agency, network, ...). A finding is suppressed when its own line
+    # or the immediately preceding line carries the marker.
+    _suppress_cache = {}
+
+    def _line_suppressed(fpath: str, line: Optional[int]) -> bool:
+        if not line:
+            return False
+        try:
+            p = Path(fpath)
+            if p not in _suppress_cache:
+                _suppress_cache[p] = p.read_text(encoding='utf-8', errors='replace').splitlines()
+            lines = _suppress_cache[p]
+        except Exception:
+            return False
+        for i in (line - 1, line - 2):  # current line (1-based), then previous
+            if 0 <= i < len(lines) and 'skillgate: ignore' in lines[i]:
+                return True
+        return False
+
+    result.findings = [
+        f for f in result.findings
+        if not _line_suppressed(f.file, f.line)
+    ]
 
     # Compute score
     result.trust_score = compute_trust_score(result)

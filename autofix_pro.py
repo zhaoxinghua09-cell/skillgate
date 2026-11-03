@@ -43,8 +43,8 @@ def fix_hardcoded_secret(filepath: Path, line_number: int, old_line: str) -> str
 
 def fix_eval_to_literal_eval(filepath: Path, line_number: int, old_line: str) -> str:
     """Fix eval() by replacing with ast.literal_eval()."""
-    if "eval(" in old_line:
-        new_line = old_line.replace("eval(", "ast.literal_eval(")
+    if "eval(" in old_line:  # skillgate: ignore: fix logic string checks (reviewed)
+        new_line = old_line.replace("eval(", "ast.literal_eval(")  # skillgate: ignore: fix logic string checks (reviewed)
         return generate_fix_diff(filepath, line_number, old_line, new_line)
     return ""
 

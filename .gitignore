@@ -1,0 +1,9 @@
+# Python build artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# SkillGate runtime artifacts (local audit trail, not for sharing)
+.skillgate-audit.jsonl
