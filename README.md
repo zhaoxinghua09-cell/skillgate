@@ -70,7 +70,7 @@ SkillGate is the **first end-to-end trust infrastructure for AI agent skills**. 
 
 | Layer | What it does |
 |-------|-------------|
-| 🔒 **Gate 1: Security Scan** | 400+ detection patterns × 22 categories, multi-language static analysis (Python/JS/Shell/Markdown/YAML/TOML/TXT), fully offline |
+| 🔒 **Gate 1: Security Scan** | 176 detection patterns × 22 categories, multi-language static analysis (Python/Shell/JS/TS/PS1/Batch/Ruby/PHP/Perl/Go/Rust/VBS/Lua/Markdown/YAML/TOML/JSON/TXT/XML/HTML/CSV/ENV), fully offline |
 | 🧪 **Gate 2: Capability Bench** | Dry-run test-plan preview, baseline comparison (no code execution) |
 | 📊 **Continuous Monitoring** | Weekly regression scans, score drop alerts, trend tracking |
 | 🏆 **Trust Score** | Single number that answers: *can I trust this skill?* |
