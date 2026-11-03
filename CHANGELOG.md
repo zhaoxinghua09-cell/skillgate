@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.10] - 2026-11-03
+
+### Security (confined writes & enforced gate)
+- `--output` / `--badge`（含 bench `--output`）写入路径强制限定在扫描目标目录内，越界写入直接拒绝——监控/扫描无法修改选中文件夹之外的任何文件
+- `--batch` 模式现在同样执行 `--fail-under` 信任分阈值（此前仅检查 critical/high），声明的安全门禁全模式生效
+- `medical-file-watcher` 监控日志改写到**被监控目录内**（`.medical-file-watcher-log.json`），不再写引擎目录
+- README 能力描述收敛为实际实现（移除 taint/CVE 数据库/15-17 语言/Docker 扫描等夸大声明），目录树与实际包文件一致
+- SKILL.md 新增 Confined writes 声明段
+
 ## [1.0.9] - 2026-11-03
 
 ### Security (zero-egress)
