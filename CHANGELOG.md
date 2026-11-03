@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.23] - 2026-11-04
+
+### Security (no skipped logic folders; coverage disclosure)
+- **docs/doc/test/tests 目录不再整体排除**：恶意技能此前可在 docs/tests 藏毒（该目录被 DEFAULT_EXCLUDES 整体跳过）——现仅跳过 .git/__pycache__/node_modules 等版本控制与依赖内部
+- **扫描覆盖披露**：报告新增 scan-coverage INFO 条目，明示跳过的目录清单——"clean" 结论不再隐藏未检查的文件夹
+- shell 规则补全 wget|sh / curl|bash 等管道下载执行变体
+- 自扫维持 98/A+/0
+
 ## [1.0.22] - 2026-11-04
 
 ### Security (no overstated approvals; honest claims)
