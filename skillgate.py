@@ -1245,17 +1245,14 @@ def main():
 
         def _confined_write(rel_target, data):
             p = Path(rel_target).resolve()
-            if not str(p).startswith(str(_target_dir)):
+            try:
+                ok = p.is_relative_to(_target_dir)
+            except (ValueError, AttributeError):
+                ok = False
+            if not ok:
                 print(f"错误: 输出路径必须在扫描目标目录内: {_target_dir}", file=sys.stderr)
                 sys.exit(2)
             p.write_text(data, encoding="utf-8")
-
-        # 自动记录到审计日志（有籍）
-        try:
-            from audit_log import record_scan
-            record_scan(result, args.skill_dir)
-        except Exception:
-            pass  # 审计日志失败不影响主流程
 
         # Generate badge if requested
         if args.badge:
