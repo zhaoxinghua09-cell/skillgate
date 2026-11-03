@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.15] - 2026-11-03
+
+### Security (read-only promise now true)
+- skillwatch 默认完全只读：不再自动写 `.skillwatch-history.json`；仅当显式 `--history FILE` 时才持久化基线
+- `--history` 写入前双重守卫：拒绝 symlink/junction（reparse point）目标 + 拒绝 resolve 后位于监控目录之外的目标——封死"链接把写重定向到外部"攻击面
+- SKILL.md / README 的 "read-only monitor" 声明与实现对齐
+
 ## [1.0.14] - 2026-11-03
 
 ### Security (enforce advertised safeguards)
