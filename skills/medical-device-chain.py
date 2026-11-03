@@ -165,6 +165,9 @@ def run_chain(filepath: str, device_class: str = "3") -> dict:
 
     # 生成 HTML 报告（仅写输入文档所在目录——用户明确提供文件的目录，绝不写引擎/外部目录）
     report_path = Path(filepath).resolve().parent / "scan-report.html"
+    if report_path.is_symlink() or report_path.is_junction():
+        print("错误: 报告输出路径不能是符号链接/junction", file=sys.stderr)
+        sys.exit(2)
     _generate_html_report(filepath, device_class, results, passed, failed, report_path)
     print(f"\n  📄 HTML 报告已生成: {report_path.name}")
 
