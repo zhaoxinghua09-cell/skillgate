@@ -105,6 +105,7 @@ def handle_tools_call(params: dict) -> dict:
 
     if tool_name == "scan_skill":
         skill_dir = args.get("skill_dir", "")
+        fail_under = args.get("fail_under")
         try:
             result = skillgate.scan_skill(skill_dir)
             out = _scan_result_to_dict(result)
@@ -118,6 +119,28 @@ def handle_tools_call(params: dict) -> dict:
                     "line": f.get("line"),
                 })
             out["findings"] = findings
+            # Enforce the advertised security threshold: when fail_under is
+            # provided and the trust score falls below it, the call FAILS.
+            # The threshold is never silently ignored.
+            if fail_under is not None:
+                try:
+                    threshold = int(fail_under)
+                except (TypeError, ValueError):
+                    return {
+                        "content": [{"type": "text", "text": json.dumps(
+                            {"error": f"fail_under 必须是整数，收到: {fail_under!r}"},
+                            ensure_ascii=False)}],
+                        "isError": True,
+                    }
+                if result.trust_score < threshold:
+                    return {
+                        "content": [{"type": "text", "text": json.dumps(
+                            {"error": f"Trust Score {result.trust_score} 低于阈值 {threshold}，拒绝通过",
+                             "trust_score": result.trust_score,
+                             "fail_under": threshold,
+                             "grade": result.grade}, ensure_ascii=False)}],
+                        "isError": True,
+                    }
             text = json.dumps(out, indent=2, ensure_ascii=False)
             return {"content": [{"type": "text", "text": text}]}
         except Exception as e:
