@@ -44,8 +44,42 @@ def run_bench(skill_dir: str) -> dict:
     return {"exit_code": 0, "skill": skill_name, "test_count": len(tests), "dry_run": True}
 
 
-def watch_skill(skill_dir: str, drop_threshold: int = 10):
-    """Watch a skill: scan + bench, compare to baseline, alert on drop."""
+def _is_reparse_point(path: Path) -> bool:
+    """True if the path is a symlink or a Windows junction/reparse point.
+    Writing through such a link could redirect the write outside the
+    monitored folder, so skillwatch never follows one."""
+    try:
+        st = path.lstat()
+    except OSError:
+        return False
+    if getattr(st, "st_file_attributes", 0) & 0x400:  # FILE_ATTRIBUTE_REPARSE_POINT
+        return True
+    return path.is_symlink()
+
+
+def _safe_history_path(skill_path: Path, history_file: str) -> Path:
+    """Resolve the optional history location and refuse anything that could
+    redirect the write outside the monitored folder (symlink/junction, or a
+    resolved target outside the folder)."""
+    target = Path(history_file)
+    if not target.is_absolute():
+        target = skill_path / target
+    target = target.resolve()
+    if _is_reparse_point(target):
+        raise ValueError(f"历史文件 {history_file} 是符号链接/junction，拒绝写入")
+    try:
+        target.relative_to(skill_path.resolve())
+    except ValueError:
+        raise ValueError(f"历史文件 {history_file} 解析后位于监控目录之外，拒绝写入")
+    return target
+
+
+def watch_skill(skill_dir: str, drop_threshold: int = 10, history_file: str = None):
+    """Watch a skill: scan + bench, compare to baseline, alert on drop.
+
+    Read-only by default: no file is written unless an explicit
+    --history FILE is given (user-chosen location, guarded against
+    symlink/junction redirection)."""
     skill_path = Path(skill_dir).resolve()
     if not skill_path.is_dir():
         print(f"错误: 目录不存在 - {skill_dir}", file=sys.stderr)
@@ -71,11 +105,13 @@ def watch_skill(skill_dir: str, drop_threshold: int = 10):
     print(f"  Trust Score: {current_score}/100 ({grade})")
     print(f"  Critical: {scan_result.get('critical_count', 0)}, High: {scan_result.get('high_count', 0)}")
 
-    # Compare with stored history
-    history_path = skill_path / ".skillwatch-history.json"
+    # Compare with stored history (only if an explicit --history was given)
+    history_path = None
     history = []
-    if history_path.exists():
-        history = json.loads(history_path.read_text(encoding="utf-8"))
+    if history_file:
+        history_path = _safe_history_path(skill_path, history_file)
+        if history_path.exists():
+            history = json.loads(history_path.read_text(encoding="utf-8"))
 
     prev_score = history[-1]["trust_score"] if history else None
     if prev_score is not None:
@@ -97,19 +133,22 @@ def watch_skill(skill_dir: str, drop_threshold: int = 10):
     else:
         print(f"  ❌ 有测试失败")
 
-    # Save history
-    history.append({
-        "timestamp": timestamp,
-        "trust_score": current_score,
-        "grade": grade,
-        "critical": scan_result.get("critical_count", 0),
-        "high": scan_result.get("high_count", 0),
-        "bench_pass": bench_result["exit_code"] == 0,
-    })
-    # Keep last 50 entries
-    history = history[-50:]
-    history_path.write_text(json.dumps(history, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"\n📊 历史记录已保存: {history_path}")
+    # Save history (only when an explicit --history was given)
+    if history_path is not None:
+        history.append({
+            "timestamp": timestamp,
+            "trust_score": current_score,
+            "grade": grade,
+            "critical": scan_result.get("critical_count", 0),
+            "high": scan_result.get("high_count", 0),
+            "bench_pass": bench_result["exit_code"] == 0,
+        })
+        # Keep last 50 entries
+        history = history[-50:]
+        history_path.write_text(json.dumps(history, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(f"\n📊 历史记录已保存: {history_path}")
+    else:
+        print(f"\nℹ️  只读模式：未写入任何文件（如需持久化基线请指定 --history FILE）")
 
     # Final verdict
     print(f"\n{'='*60}")
@@ -132,11 +171,14 @@ def main():
     watch_parser.add_argument("skill_dir", help="skill 目录路径")
     watch_parser.add_argument("--drop-threshold", type=int, default=10,
                               help="分数跌幅超过此值则告警（默认 10）")
+    watch_parser.add_argument("--history", default=None,
+                              help="可选：持久化基线的文件路径（默认只读、不写任何文件）")
 
     args = ap.parse_args()
 
     if args.command == "watch":
-        exit_code = watch_skill(args.skill_dir, drop_threshold=args.drop_threshold)
+        exit_code = watch_skill(args.skill_dir, drop_threshold=args.drop_threshold,
+                                history_file=args.history)
         sys.exit(exit_code)
     else:
         ap.print_help()
