@@ -96,7 +96,7 @@ SkillGate is built on the **LGD Trust Framework** (有籍 / 有证 / 有门禁):
 ## ✨ Features
 
 ### 🔍 Deep Scanning
-- **400+ patterns** across 22 categories (secrets, dangerous code, injection, dependencies, …)
+- **176 detection patterns** across 22 categories (secrets, dangerous code, injection, dependencies, …)
 - **Multi-language static analysis**: Python, Shell, JavaScript/TypeScript, PowerShell, Batch, Ruby, PHP, Perl, Go, Rust, VBS, Lua, Markdown, YAML, TOML, TXT
 - **Local-only**: fully offline, no network requests, no code execution
 
@@ -319,7 +319,7 @@ graph TD
 ```
 
 Three gates, one score:
-1. 🔒 **Security** — 400+ patterns, multi-language static analysis (no network, no execution)
+1. 🔒 **Security** — 176 detection patterns, multi-language static analysis (no network, no execution)
 2. 🧪 **Capability** — does the skill actually work?
 3. 📊 **Continuity** — does it stay good over time?
 
