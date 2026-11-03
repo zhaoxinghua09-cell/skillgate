@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.20] - 2026-11-03
+
+### Security (never skip executables; scan commands in docs)
+- **二进制魔数检测**：无后缀文件按魔数识别（ELF/PE(MZ)/Mach-O/Java class/zip/gzip/WebAssembly），不再只在常见目录才拦截——根目录无后缀可执行文件同样报 binary-payload
+- **Markdown 代码块危险调用扫描**：README 等文档围栏代码块内的命令执行（curl|sh、os.system 等）现按脚本规则扫描——技能可把命令藏进文档示例
+- 规则示例豁免仅自扫生效（README 自定义规则示例行）；自扫维持 98/A+/0
+
 ## [1.0.19] - 2026-11-03
 
 ### Security (never skip executables in common folders)
