@@ -18,7 +18,6 @@ import json
 import os
 import re
 import sys
-import urllib.request
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from typing import Optional
@@ -531,37 +530,15 @@ def scan_dependencies(skill_path: Path, result: ScanResult):
     if not deps:
         return
 
-    # Query OSV.dev for each dependency
-    for name, version in deps[:10]:  # limit to 10 deps to avoid timeout
-        try:
-            payload = json.dumps({
-                "package": {"name": name, "ecosystem": "PyPI"},
-                "version": version
-            }).encode()
-
-            req = urllib.request.Request(
-                "https://api.osv.dev/v1/query",
-                data=payload,
-                headers={"Content-Type": "application/json"}
-            )
-
-            with urllib.request.urlopen(req, timeout=5) as resp:  # nosec B310 - URL is fixed GitHub API, not user input
-                data = json.loads(resp.read())
-                vulns = data.get("vulns", [])
-                if vulns:
-                    for v in vulns[:3]:  # top 3 vulns per dep
-                        result.findings.append(Finding(
-                            severity="HIGH", category="dependency-vuln",
-                            message=f"{name}=={version}: {v.get('summary', 'known vulnerability')}",
-                            file=str(req_file)
-                        ))
-        except Exception:
-            # Offline fallback: just note that we couldn't check
-            result.findings.append(Finding(
-                severity="LOW", category="dependency-scan",
-                message=f"无法联网检查 {name} 的已知漏洞",
-                file=str(req_file)
-            ))
+    # SECURITY & PRIVACY: dependency CVE checking is OFFLINE by default.
+    # The scanner never makes network requests (no OSV/GitHub API calls), so an
+    # untrusted folder cannot trigger egress or leak anything. We only note that
+    # online CVE lookup is skipped.
+    result.findings.append(Finding(
+        severity="LOW", category="dependency-scan",
+        message=f"依赖漏洞在线检查已禁用（离线模式，无网络请求）：检测到 {len(deps)} 个依赖",
+        file=str(req_file)
+    ))
 
 
 def scan_shell_file(filepath: Path, result: ScanResult):
