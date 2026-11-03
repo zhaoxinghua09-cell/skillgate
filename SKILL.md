@@ -31,6 +31,7 @@ tags:
 - **Detection rule library contains dangerous-pattern strings by design**: SkillGate must recognize threat patterns (dynamic code execution, credential access, prompt injection, privilege escalation) to flag them. Those strings live in the rule library and are *patterns to detect*, not code SkillGate executes. Findings tagged from the rule library are annotated accordingly.
 - **Suppression markers cannot be abused**: `# skillgate: ignore` markers are honored **only when SkillGate scans its own directory** (rule library self-scan). Markers inside scanned third-party skills have **no effect** and are reported as a `suppression-abuse` finding, so a malicious skill can never hide findings or manipulate its Trust Score. Every suppressed finding is counted and disclosed in all report formats, never silently dropped.
 - **Target config cannot exclude payload**: `.skillgate.yml/.yaml` `paths.exclude` rules are honored **only during self-scan**. A scanned third-party skill's bundled config is ignored entirely, so it cannot silently exclude its own dangerous files from review.
+- **Zero network egress**: the scanner makes **no network requests** — dependency CVE checking is offline by default (only a local note is emitted), so an untrusted scanned folder cannot trigger outbound traffic.
 - **MCP server**: `skillgate-mcp.py` exposes scan/report/badge endpoints and runs only `python` subprocesses with timeouts; no network egress, no credential reads.
 
 ## Usage
