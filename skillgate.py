@@ -1485,6 +1485,7 @@ def main():
                 sys.exit(2)
 
             all_results = []
+            failed_dirs = []
             skill_dirs = [d for d in base_path.iterdir() if d.is_dir()]
             print(f"批量扫描: 发现 {len(skill_dirs)} 个子目录")
 
@@ -1495,20 +1496,32 @@ def main():
                     status = "✅" if r.critical_count == 0 and r.high_count == 0 else "❌"
                     print(f"  {status} {r.skill_name}: {r.trust_score}/100 ({r.grade})")
                 except Exception as e:
-                    print(f"  ⚠️  {d.name}: 扫描失败 - {e}")
+                    # A directory that fails to scan must NEVER vanish from the
+                    # batch summary or count as passed — it is a scan failure and
+                    # must fail the batch exit code.
+                    failed_dirs.append(str(d))
+                    print(f"  ❌ {d.name}: 扫描失败 - {e}", file=sys.stderr)
+                    r = ScanResult(skill_name=d.name, skill_path=str(d), trust_score=0, grade="F")
+                    r.findings.append(Finding(
+                        severity="CRITICAL", category="scan-error",
+                        message=f"批量扫描失败（该目录未通过扫描）: {e}",
+                        file=str(d), line=0,
+                    ))
+                    all_results.append(r)
 
             # Summary
             print(f"\n{'='*60}")
             print(f"  批量扫描汇总")
             print(f"{'='*60}")
-            print(f"  总计: {len(all_results)} 个 skill")
+            print(f"  总计: {len(skill_dirs)} 个 skill（失败 {len(failed_dirs)} 个）")
             avg_score = sum(r.trust_score for r in all_results) / len(all_results) if all_results else 0
             print(f"  平均 Trust Score: {avg_score:.1f}/100")
             passed = len([r for r in all_results if r.critical_count == 0 and r.high_count == 0 and (args.fail_under is None or r.trust_score >= args.fail_under)])
-            print(f"  通过: {passed}/{len(all_results)}")
+            print(f"  通过: {passed}/{len(skill_dirs)}")
 
-            # Exit code
-            if passed < len(all_results):
+            # Exit code — failed dirs are included in the denominator, so any
+            # scan failure (or any failed gate) yields a non-zero exit.
+            if failed_dirs or passed < len(skill_dirs):
                 sys.exit(1)
             else:
                 sys.exit(0)
