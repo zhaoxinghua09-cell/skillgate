@@ -70,8 +70,8 @@ SkillGate is the **first end-to-end trust infrastructure for AI agent skills**. 
 
 | Layer | What it does |
 |-------|-------------|
-| 🔒 **Gate 1: Security Scan** | 400+ rules × 22 categories, 15 languages, taint analysis, CVE detection |
-| 🧪 **Gate 2: Capability Bench** | Run standard test cases, measure real performance, baseline comparison |
+| 🔒 **Gate 1: Security Scan** | 400+ detection patterns × 22 categories, multi-language static analysis (Python/JS/Shell/Markdown/YAML/TOML/TXT), fully offline |
+| 🧪 **Gate 2: Capability Bench** | Dry-run test-plan preview, baseline comparison (no code execution) |
 | 📊 **Continuous Monitoring** | Weekly regression scans, score drop alerts, trend tracking |
 | 🏆 **Trust Score** | Single number that answers: *can I trust this skill?* |
 
@@ -96,12 +96,9 @@ SkillGate is built on the **LGD Trust Framework** (有籍 / 有证 / 有门禁):
 ## ✨ Features
 
 ### 🔍 Deep Scanning
-- **400+ rules** across 22 categories (secrets, dangerous code, injection, taint, dependencies, …)
-- **15 languages** supported: Python, JavaScript/TypeScript, Go, Rust, Java, PHP, Ruby, C#, C, Perl, Swift, Kotlin, Shell, Markdown, Dockerfile
-- **Taint analysis**: track data flow from user input to dangerous sinks
-- **Built-in CVE database**: offline vulnerability detection for common packages
-- **Dependency scanning**: direct + transitive dependencies
-- **Docker image scanning**: base image age and EOL detection
+- **400+ patterns** across 22 categories (secrets, dangerous code, injection, dependencies, …)
+- **Multi-language static analysis**: Python, JavaScript, Shell, Markdown, YAML, TOML, TXT
+- **Local-only**: fully offline, no network requests, no code execution
 
 ### 🎯 Trust Score
 - Weighted scoring: CRITICAL = -15, HIGH = -8, MEDIUM = -3, LOW = -1
@@ -220,10 +217,10 @@ It looks like this:
 
 ## 🧪 Skill Bench
 
-Run standardized test cases to measure real capability:
+Preview the dry-run test plan for a skill (no code execution, read-only):
 
 ```bash
-skillgate bench ./my-skill/ --test-suite basic
+python skillbench.py run ./my-skill/ --output plan.json
 ```
 
 Compares your skill against a baseline to show:
@@ -257,22 +254,24 @@ See [docs/rules.md](docs/rules.md) for the full rule writing guide.
 
 ```
 skillgate/
-├── skillgate.py          # Main CLI
-├── rule_engine.py         # Custom YAML rules
-├── ast_analyzer.py        # Python AST analysis
-├── js_analyzer.py         # JS/TS scanner
-├── dep_tree.py            # Dependency scanning
-├── cve_database.py        # Built-in CVE DB
-├── taint_tracker.py       # Data flow analysis
-├── skillbench.py          # Benchmark plan preview (dry-run, no execution)
-├── skillwatch.py          # Read-only monitoring (in-process scan)
-├── autofix_pro.py         # Auto-fix code diffs
-├── cloud_server.py        # Cloud API server
-├── rules/                 # Custom rule examples
-├── ci-templates/          # CI/CD templates
-├── vscode-extension/      # VSCode plugin
-├── docs/                  # Documentation
-└── tests/                 # Unit tests
+├── skillgate.py          # Main CLI (static scanner + gate)
+├── ast_analyzer.py       # Python AST analysis
+├── rule_engine.py        # Custom YAML rules
+├── badge_generator.py    # SVG trust-score badges
+├── cache.py              # Local scan cache (engine dir only)
+├── dependency_manager.py # Dependency handling
+├── scorecard.py          # Scorecard helpers
+├── traces.py             # Local trace log (engine dir only)
+├── skillbench.py         # Benchmark plan preview (dry-run, no execution)
+├── skillwatch.py         # Read-only monitoring (in-process scan)
+├── skillgate-mcp.py      # MCP server (in-process, no subprocess)
+├── skills/               # 17 companion skills (12 compliance + 2 quality + 3 workflow)
+├── llms.txt              # LLM-friendly index
+├── skill-card.md         # ClawHub skill card
+├── CHANGELOG.md
+├── LICENSE
+├── README.md
+└── SKILL.md
 ```
 
 ---
@@ -322,7 +321,7 @@ graph TD
 ```
 
 Three gates, one score:
-1. 🔒 **Security** — 600+ rules, 17 languages, taint analysis
+1. 🔒 **Security** — 400+ patterns, multi-language static analysis (no network, no execution)
 2. 🧪 **Capability** — does the skill actually work?
 3. 📊 **Continuity** — does it stay good over time?
 
