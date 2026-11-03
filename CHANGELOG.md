@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.25] - 2026-11-04
+
+### Security (all output paths link-safe)
+- **配套工具写面统一 symlink 防护**：skillbench --output、medical-device-chain 报告、medical-file-watcher 日志——所有 companion 输出路径拒绝 symlink/junction 目标，防止 crafted folders 把报告写入包外无关文件
+- 自扫维持 98/A+/0
+
 ## [1.0.24] - 2026-11-04
 
 ### Security (link containment; no outside pull-in)
