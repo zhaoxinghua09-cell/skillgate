@@ -668,8 +668,7 @@ def scan_shell_file(filepath: Path, result: ScanResult):
     lines = content.splitlines()
     dangerous_sh_patterns = [
         (r"\brm\s+-rf?\s+/", "CRITICAL", "rm -rf / 危险删除"),
-        (r"\bcurl\s+.*\|\s*sh", "HIGH", "curl | sh 管道执行远程脚本"),
-        (r"\bwget\s+.*\|\s*bash", "HIGH", "wget | bash 管道执行远程脚本"),
+        (r"\b(curl|wget)\s+.*\|\s*(sh|bash)", "HIGH", "管道下载执行远程脚本"),
         (r"\bchmod\s+777", "MEDIUM", "chmod 777 权限过松"),
         (r"\bsudo\s+", "MEDIUM", "sudo 权限提升"),
     ]
@@ -887,8 +886,17 @@ def scan_skill(skill_dir: str) -> ScanResult:
 
     result = ScanResult(skill_dir=str(skill_path))
 
-    # Default excluded directories
-    DEFAULT_EXCLUDES = {"tests", "test", "docs", "doc", ".git", "__pycache__", "node_modules"}
+    # Default excluded directories: only version-control and dependency
+    # internals are skipped (a skill's own logic must never be hidden in
+    # docs/test folders, so those are NOT excluded).
+    DEFAULT_EXCLUDES = {".git", "__pycache__", "node_modules"}
+    # Disclose what is intentionally skipped so a "clean" verdict never
+    # hides the fact that some folders were not inspected.
+    result.findings.append(Finding(
+        severity="INFO", category="scan-coverage",
+        message="Skipped folders: " + ", ".join(sorted(DEFAULT_EXCLUDES)) + " (version-control/dependency internals)",
+        file=str(skill_path), line=0,
+    ))
 
     # Config-driven excludes (.skillgate.yml paths.exclude), with ** glob support.
     # SECURITY: the config file is honored ONLY when SkillGate scans its own
