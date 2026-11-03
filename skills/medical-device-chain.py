@@ -163,8 +163,8 @@ def run_chain(filepath: str, device_class: str = "3") -> dict:
 
     print("\n" + "=" * 70)
 
-    # 生成 HTML 报告
-    report_path = Path(filepath).parent / "scan-report.html"
+    # 生成 HTML 报告（仅写输入文档所在目录——用户明确提供文件的目录，绝不写引擎/外部目录）
+    report_path = Path(filepath).resolve().parent / "scan-report.html"
     _generate_html_report(filepath, device_class, results, passed, failed, report_path)
     print(f"\n  📄 HTML 报告已生成: {report_path.name}")
 
