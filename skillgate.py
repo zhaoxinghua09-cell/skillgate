@@ -28,11 +28,9 @@ try:
 except ImportError:
     ast_analyze = None
 
-# Import JS analyzer
-try:
-    from js_analyzer import scan_js_file
-except ImportError:
-    scan_js_file = None
+# All script-like languages are scanned by the built-in language-agnostic
+# scanner below — no optional analyzer module is required (never "miss
+# dangerous files" because a helper is absent).
 
 
 # ── Config (.skillgate.yml) support ─────────────────────────────────────────
@@ -541,6 +539,53 @@ def scan_dependencies(skill_path: Path, result: ScanResult):
     ))
 
 
+# Language-agnostic dangerous-call patterns for all script languages:
+# JavaScript/TypeScript, PowerShell, Batch, Ruby, PHP, Perl, Go, Rust, VBS, Lua.
+SCRIPT_PATTERNS = [
+    (r"child_process\.(exec|execSync|spawn|fork)\s*\(", "HIGH", "child_process 命令执行"),
+    (r"require\s*\(\s*['\"]child_process['\"]\s*\)", "HIGH", "加载 child_process 命令执行"),
+    (r"Invoke-Expression\b|\biex\s+", "HIGH", "PowerShell 动态执行"),
+    (r"\.DownloadString\s*\(|\.DownloadFile\s*\(|WebClient\s*\(|Start-BitsTransfer", "HIGH", "远程下载并执行"),
+    (r"Process\.Start\s*\(", "HIGH", "进程启动"),
+    (r"Runtime\.getRuntime\(\).*\.exec\s*\(", "HIGH", "Java 运行时命令执行"),
+    (r"shell_exec\s*\(|passthru\s*\(|system\s*\(|exec\s*\(", "HIGH", "PHP 命令执行"),
+    (r"eval\s*\(", "MEDIUM", "eval 动态代码执行"),
+    (r"new\s+Function\s*\(", "MEDIUM", "new Function 动态执行"),
+    (r"eval\s*\(\s*(atob|base64)", "HIGH", "base64 解码后执行"),
+    (r"subprocess\.(Popen|call|run|check_output)\s*\(", "MEDIUM", "subprocess 调用"),
+    (r"popen\s*\(|os\.system\s*\(|os\.popen\s*\(", "MEDIUM", "系统命令调用"),
+    (r"wget[^|\n]*\|[^|\n]*sh|curl[^|\n]*\|[^|\n]*sh|curl[^|\n]*\|[^|\n]*bash", "HIGH", "管道下载执行"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"curl\s+[\w.:/-]+|wget\s+[\w.:/-]+", "LOW", "下载行为（检查目标）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"atob\s*\(|Buffer\.from\s*\([^,]+,\s*['\"]base64", "LOW", "base64 解码（检查用途）"),
+]
+
+
+def scan_script_file(filepath: Path, result: ScanResult):
+    """Scan any script-like file (JS/TS/PS1/Bat/Ruby/PHP/Perl/Go/Rust/VBS/Lua)
+    for dangerous calls. Language-agnostic so no optional analyzer module can
+    silently go missing."""
+    try:
+        content = filepath.read_text(encoding="utf-8", errors="replace")
+    except Exception:
+        return
+
+    lines = content.splitlines()
+
+    def _is_comment(l: str) -> bool:
+        s = l.lstrip()
+        return s.startswith(("#", "//", "'", "REM", "--", "(*"))
+
+    for pattern, severity, msg in SCRIPT_PATTERNS:
+        for i, line in enumerate(lines, 1):
+            if _is_comment(line):
+                continue
+            if re.search(pattern, line, re.IGNORECASE):
+                result.findings.append(Finding(
+                    severity=severity, category="dangerous-call",
+                    message=msg, file=str(filepath), line=i
+                ))
+
+
 def scan_shell_file(filepath: Path, result: ScanResult):
     """Scan a shell script for dangerous patterns."""
     try:
@@ -831,21 +876,19 @@ def scan_skill(skill_dir: str) -> ScanResult:
         scan_shell_file(sh_file, result)
         result.files_scanned += 1
 
-    # Scan all JS/TS files
-    if scan_js_file:
-        for js_file in list(skill_path.rglob("*.js")) + list(skill_path.rglob("*.ts")):
-            if should_exclude(js_file):
-                continue
-            try:
-                js_findings = scan_js_file(js_file)
-                for sev, cat, msg, line in js_findings:
-                    result.findings.append(Finding(
-                        severity=sev, category=cat,
-                        message=msg, file=str(js_file), line=line
-                    ))
-            except Exception:
-                pass
-            result.files_scanned += 1
+    # Scan all script-like files (JS/TS/PS1/Bat/Ruby/PHP/Perl/Go/Rust/VBS/Lua)
+    SCRIPT_SUFFIXES = (
+        ".js", ".ts", ".mjs", ".cjs", ".jsx", ".tsx",
+        ".ps1", ".psm1", ".bat", ".cmd", ".rb", ".php", ".pl",
+        ".go", ".rs", ".vbs", ".lua",
+    )
+    for script_file in skill_path.rglob("*"):
+        if script_file.suffix.lower() not in SCRIPT_SUFFIXES:
+            continue
+        if should_exclude(script_file):
+            continue
+        scan_script_file(script_file, result)
+        result.files_scanned += 1
 
     # Scan all Markdown files (excluding already-scanned skill docs)
     for md_file in skill_path.rglob("*.md"):
@@ -893,7 +936,10 @@ def scan_skill(skill_dir: str) -> ScanResult:
     if not _self_scan:
         try:
             for cand in skill_path.rglob("*"):
-                if cand.suffix not in (".py", ".md", ".yml", ".yaml", ".toml", ".txt"):
+                if cand.suffix not in (".py", ".md", ".yml", ".yaml", ".toml", ".txt",
+                                        ".js", ".ts", ".mjs", ".cjs", ".jsx", ".tsx",
+                                        ".ps1", ".psm1", ".bat", ".cmd", ".rb", ".php",
+                                        ".pl", ".go", ".rs", ".vbs", ".lua", ".sh"):
                     continue
                 if should_exclude(cand):
                     continue
