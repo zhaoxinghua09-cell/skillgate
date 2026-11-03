@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.14] - 2026-11-03
+
+### Security (enforce advertised safeguards)
+- skillgate-mcp `scan_skill` 的 `fail_under` 阈值现强制执行：低于阈值直接 isError 拒绝（此前仅声明未执行）——"advertised MCP security threshold is not enforced" 修复；非法阈值入参也报错
+- skills/medical-device-chain HTML 报告路径 resolve 后仅写输入文档所在目录并注释声明（绝不写引擎/外部目录）
+
 ## [1.0.13] - 2026-11-03
 
 ### Security (no missed files)
