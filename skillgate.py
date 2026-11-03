@@ -587,6 +587,15 @@ def scan_script_file(filepath: Path, result: ScanResult):
                 ))
 
 
+def _has_shebang(filepath: Path) -> bool:
+    """Return True when the file starts with a #! shebang line."""
+    try:
+        with open(filepath, "rb") as fh:
+            return fh.read(2) == b"#!"
+    except Exception:
+        return False
+
+
 def scan_data_file(filepath: Path, result: ScanResult):
     """Scan data/config text files (YAML/TOML/JSON/TXT/XML/HTML/CSV/ENV/INI)
     for dangerous calls. Skills routinely keep scripts or commands inside
@@ -918,24 +927,44 @@ def scan_skill(skill_dir: str) -> ScanResult:
         ".go", ".rs", ".vbs", ".lua",
         ".pyw", ".wsf", ".wsh", ".hta", ".jsfl",
     )
+    # Common executable directories: extension-less files under these are
+    # never silently skipped (shebang -> script scan, otherwise -> binary
+    # payload review), because skill packages keep runnables there.
+    EXEC_DIR_NAMES = {"bin", "scripts", "tools", "hooks", "plugins",
+                      "extensions", "vendor"}
     for script_file in skill_path.rglob("*"):
         if not script_file.is_file():
             continue
         suffix = script_file.suffix.lower()
-        if suffix not in SCRIPT_SUFFIXES:
-            if suffix:
-                continue
-            # Extension-less: only scan when it starts with a shebang
+        if suffix in SCRIPT_SUFFIXES:
+            is_script_like = True
+        elif not suffix:
             try:
                 with open(script_file, "rb") as fh:
                     head = fh.read(2)
             except Exception:
                 continue
-            if head != b"#!":
-                continue
+            if head == b"#!":
+                is_script_like = True
+            else:
+                # Extension-less non-shebang: only treat when located in a
+                # common executable directory; otherwise it is likely data.
+                parent_chain = {p.name.lower() for p in script_file.parents}
+                is_script_like = bool(parent_chain & EXEC_DIR_NAMES)
+                if not is_script_like:
+                    continue
+        else:
+            continue
         if should_exclude(script_file):
             continue
-        scan_script_file(script_file, result)
+        if script_file.suffix.lower() in SCRIPT_SUFFIXES or _has_shebang(script_file):
+            scan_script_file(script_file, result)
+        else:
+            result.findings.append(Finding(
+                severity="MEDIUM", category="binary-payload",
+                message="Executable payload in a common run folder; static analysis cannot inspect its behavior — requires manual/vendor review",
+                file=str(script_file), line=0,
+            ))
         result.files_scanned += 1
 
     # Scan all Markdown files (excluding already-scanned skill docs)
