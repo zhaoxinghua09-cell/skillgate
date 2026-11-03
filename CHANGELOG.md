@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.7] - 2026-11-03
+
+### Security
+- 移除 `--lenient` 宽松模式：不再支持"所有规则降一级"（该模式可使 CRITICAL/HIGH 降级从而绕过发布门禁，属可绕过面）
+- 包内代码执行点清零：skillbench 删除全部 subprocess 执行代码（仅保留测试定义数据 + dry-run 预览）；skillgate-mcp 改为进程内 import 直调（无 subprocess/无网络）；skillwatch 改为只读监控（进程内扫描调用）
+- SKILL.md 边界声明与代码严格一致：零执行路径、无宽松模式、17 个配套技能精确列明（12 医疗合规 + 2 质量检查 + 3 工作流）
+
 ## [1.0.6] - 2026-11-03
 
 ### Security
