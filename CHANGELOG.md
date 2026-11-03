@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.21] - 2026-11-04
+
+### Compliance (ClawHub card & declaration alignment)
+- SKILL.md / skill-card.md 增加 YAML frontmatter 与 `metadata.openclaw` 运行时声明（requires.bins: python、homepage）——与平台"声明与行为一致"审查对齐，解锁 card.available
+- 自扫维持 98/A+/0
+
 ## [1.0.20] - 2026-11-03
 
 ### Security (never skip executables; scan commands in docs)
