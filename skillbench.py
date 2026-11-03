@@ -123,7 +123,13 @@ def main():
         for t in tests:
             print(f"   - {t['name']}: {' '.join(t['cmd'])}")
         if args.output:
-            Path(args.output).write_text(
+            # Confined write: export plan only inside the target folder.
+            _target = Path(args.skill_dir).resolve()
+            _out = Path(args.output).resolve()
+            if not str(_out).startswith(str(_target)):
+                print(f"错误: 输出路径必须在目标目录内: {_target}", file=sys.stderr)
+                sys.exit(2)
+            _out.write_text(
                 json.dumps({"skill": skill_name, "dry_run": True, "tests": tests}, indent=2, ensure_ascii=False),
                 encoding="utf-8")
             print(f"\n测试计划已导出: {args.output}")
