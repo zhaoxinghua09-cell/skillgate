@@ -484,7 +484,8 @@ def scan_python_file(filepath: Path, result: ScanResult):
 
 
 def scan_md_file(filepath: Path, result: ScanResult):
-    """Scan a Markdown file for prompt injection patterns."""
+    """Scan a Markdown file for prompt injection patterns and for dangerous
+    calls inside fenced code blocks (skills can hide commands in READMEs)."""
     try:
         content = filepath.read_text(encoding="utf-8", errors="replace")
     except Exception:
@@ -497,6 +498,23 @@ def scan_md_file(filepath: Path, result: ScanResult):
                 result.findings.append(Finding(
                     severity=severity, category="prompt-injection",
                     message=msg, file=str(filepath), line=i
+                ))
+
+    # Fenced code blocks: commands inside them are executable instructions.
+    in_block = False
+    for i, line in enumerate(lines, 1):
+        if line.lstrip().startswith("```"):
+            in_block = not in_block
+            continue
+        if not in_block:
+            continue
+        for pattern, severity, msg in SCRIPT_PATTERNS:
+            if severity == "LOW":
+                continue
+            if re.search(pattern, line, re.IGNORECASE):
+                result.findings.append(Finding(
+                    severity=severity, category="dangerous-call",
+                    message=f"代码块内 {msg}", file=str(filepath), line=i
                 ))
 
 
@@ -594,6 +612,19 @@ def _has_shebang(filepath: Path) -> bool:
             return fh.read(2) == b"#!"
     except Exception:
         return False
+
+
+def _binary_magic(head: bytes) -> bool:
+    """Detect common executable/binary magic numbers so extension-less
+    executables are never silently skipped."""
+    return (
+        head[:4] == b"\x7fELF" or           # ELF
+        head[:2] == b"MZ" or                # PE/DOS
+        head[:4] in (b"\xcf\xfa\xed\xfe", b"\xfe\xed\xfa\xcf",  # Mach-O
+                     b"\xca\xfe\xba\xbe", b"\xca\xfe\xba\xbf") or  # Java class
+        head[:2] in (b"PK", b"\x1f\x8b", b"\x1f\x9d", b"\x1f\xa0") or  # zip/gzip/tar
+        head[:4] == b"\x00asm"              # WebAssembly
+    )
 
 
 def scan_data_file(filepath: Path, result: ScanResult):
@@ -941,14 +972,24 @@ def scan_skill(skill_dir: str) -> ScanResult:
         elif not suffix:
             try:
                 with open(script_file, "rb") as fh:
-                    head = fh.read(2)
+                    head = fh.read(4)
             except Exception:
                 continue
-            if head == b"#!":
+            if head[:2] == b"#!":
                 is_script_like = True
+            elif _binary_magic(head):
+                # Extension-less binary with executable magic bytes:
+                # never silently skip it, surface for manual review.
+                result.findings.append(Finding(
+                    severity="MEDIUM", category="binary-payload",
+                    message="Extension-less executable payload (binary magic); static analysis cannot inspect its behavior — requires manual/vendor review",
+                    file=str(script_file), line=0,
+                ))
+                result.files_scanned += 1
+                continue
             else:
-                # Extension-less non-shebang: only treat when located in a
-                # common executable directory; otherwise it is likely data.
+                # Extension-less non-shebang text: only treat when located in
+                # a common executable directory; otherwise it is likely data.
                 parent_chain = {p.name.lower() for p in script_file.parents}
                 is_script_like = bool(parent_chain & EXEC_DIR_NAMES)
                 if not is_script_like:
