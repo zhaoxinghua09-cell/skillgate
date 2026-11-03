@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.24] - 2026-11-04
+
+### Security (link containment; no outside pull-in)
+- **symlink/junction 守卫**：扫描器对所有文件遍历点拒绝并披露 symlink/junction（目标可能指向包外）——恶意包无法通过链接把外部文件拉入报告或藏匿载荷
+- **写入重定向防护**：`--output/--badge` 等报告写入拒绝 symlink/junction 目标，杜绝"crafted folders redirect file writes"
+- 自扫维持 98/A+/0
+
 ## [1.0.23] - 2026-11-04
 
 ### Security (no skipped logic folders; coverage disclosure)
