@@ -879,13 +879,19 @@ def scan_skill(skill_dir: str) -> ScanResult:
     # Scan dependencies for known vulnerabilities
     scan_dependencies(skill_path, result)
 
-    # Post-filter: apply line-level `# skillgate: ignore` suppression uniformly
-    # across ALL detectors (dangerous-code, credential-leak, ast-analysis,
-    # excessive-agency, network, ...). A finding is suppressed when its own line
-    # or the immediately preceding line carries the marker.
+    # Post-filter: apply line-level `# skillgate: ignore` suppression.
+    # SECURITY: the marker is honored ONLY when scanning the engine's own
+    # directory (self-scan). For any scanned third-party skill, markers in the
+    # target code are IGNORED — they must never be able to hide findings —
+    # and a finding is raised instead. This closes the "malicious skill hides
+    # itself with an ignore marker" attack.
+    _engine_dir = Path(__file__).resolve().parent
+    _self_scan = _engine_dir == skill_path.resolve()
     _suppress_cache = {}
 
     def _line_suppressed(fpath: str, line: Optional[int]) -> bool:
+        if not _self_scan:
+            return False
         if not line:
             return False
         try:
@@ -902,6 +908,27 @@ def scan_skill(skill_dir: str) -> ScanResult:
 
     # 如实披露被抑制的发现：数量与清单随报告输出，Trust Score 基于剩余发现计算，
     # 但抑制情况永不静默（gate 输出与所有报告格式都会展示）。
+    # 非自扫时，目标代码中的 `skillgate: ignore` 标记无效且会被记为一条发现，
+    # 防止恶意技能用标记隐藏危险行为。
+    if not _self_scan:
+        try:
+            for cand in skill_path.rglob("*"):
+                if cand.suffix not in (".py", ".md", ".yml", ".yaml", ".toml", ".txt"):
+                    continue
+                if should_exclude(cand):
+                    continue
+                for ln, raw in enumerate(
+                        Path(cand).read_text(encoding='utf-8', errors='replace').splitlines(), 1):
+                    if 'skillgate: ignore' in raw:
+                        result.findings.append(Finding(
+                            severity="MEDIUM",
+                            category="suppression-abuse",
+                            message=("目标代码中的 `# skillgate: ignore` 标记无效：SkillGate 仅在扫描自身规则库时"
+                                     "接受该标记，被扫描代码无法抑制任何发现"),
+                            file=str(cand), line=ln,
+                        ))
+        except Exception:
+            pass
     _suppressed_findings = []
     _kept_findings = []
     for f in result.findings:
