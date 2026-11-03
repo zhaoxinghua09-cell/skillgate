@@ -258,10 +258,8 @@ skillgate/
 ├── ast_analyzer.py       # Python AST analysis
 ├── rule_engine.py        # Custom YAML rules
 ├── badge_generator.py    # SVG trust-score badges
-├── cache.py              # Local scan cache (engine dir only)
 ├── dependency_manager.py # Dependency handling
 ├── scorecard.py          # Scorecard helpers
-├── traces.py             # Local trace log (engine dir only)
 ├── skillbench.py         # Benchmark plan preview (dry-run, no execution)
 ├── skillwatch.py         # Read-only monitoring (in-process scan)
 ├── skillgate-mcp.py      # MCP server (in-process, no subprocess)
