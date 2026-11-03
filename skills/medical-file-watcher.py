@@ -9,8 +9,9 @@ from pathlib import Path
 from datetime import datetime
 
 
-project_root = Path(__file__).parent
-watcher_log = project_root / "medical-file-watcher-log.json"
+def _log_path(docs_dir: str) -> Path:
+    """Watch log lives INSIDE the monitored folder (never outside it)."""
+    return Path(docs_dir) / ".medical-file-watcher-log.json"
 
 
 def get_doc_modification_times(docs_dir: str = ".") -> dict:
@@ -30,12 +31,12 @@ def check_for_changes(docs_dir: str = ".") -> dict:
     """检查有没有医械文档变化。"""
     current_times = get_doc_modification_times(docs_dir)
 
-    # 加载上次的记录
-    last_times = _load_last_times()
+    # 加载上次的记录（日志文件在被监控目录内）
+    last_times = _load_last_times(docs_dir)
 
     if not last_times:
         # 第一次运行，保存当前状态
-        _save_last_times(current_times)
+        _save_last_times(current_times, docs_dir)
         return {
             "changed": False,
             "message": "第一次运行，记录了当前状态——下次改文档会提醒你"
@@ -48,8 +49,8 @@ def check_for_changes(docs_dir: str = ".") -> dict:
             changed_docs.append(filename)
 
     if changed_docs:
-        # 更新记录
-        _save_last_times(current_times)
+        # 更新记录（写回被监控目录内）
+        _save_last_times(current_times, docs_dir)
         return {
             "changed": True,
             "changed_docs": changed_docs,
@@ -59,20 +60,22 @@ def check_for_changes(docs_dir: str = ".") -> dict:
     return {"changed": False, "message": "没有检测到文档变化"}
 
 
-def _load_last_times() -> dict:
+def _load_last_times(docs_dir: str) -> dict:
     """加载上次的记录。"""
-    if not watcher_log.exists():
+    log = _log_path(docs_dir)
+    if not log.exists():
         return {}
 
     try:
-        return json.loads(watcher_log.read_text(encoding="utf-8"))
+        return json.loads(log.read_text(encoding="utf-8"))
     except:
         return {}
 
 
-def _save_last_times(times: dict):
-    """保存当前状态。"""
-    watcher_log.write_text(
+def _save_last_times(times: dict, docs_dir: str):
+    """保存当前状态（仅写被监控目录内）。"""
+    log = _log_path(docs_dir)
+    log.write_text(
         json.dumps(times, indent=2, ensure_ascii=False),
         encoding="utf-8"
     )
