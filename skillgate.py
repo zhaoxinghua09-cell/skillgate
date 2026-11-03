@@ -1228,7 +1228,7 @@ def main():
             print(f"  总计: {len(all_results)} 个 skill")
             avg_score = sum(r.trust_score for r in all_results) / len(all_results) if all_results else 0
             print(f"  平均 Trust Score: {avg_score:.1f}/100")
-            passed = len([r for r in all_results if r.critical_count == 0 and r.high_count == 0])
+            passed = len([r for r in all_results if r.critical_count == 0 and r.high_count == 0 and (args.fail_under is None or r.trust_score >= args.fail_under)])
             print(f"  通过: {passed}/{len(all_results)}")
 
             # Exit code
@@ -1238,6 +1238,17 @@ def main():
                 sys.exit(0)
 
         result = scan_skill(args.skill_dir)
+
+        # Confined file writes: reports/badges may ONLY be written inside the
+        # scanned folder. Never write outside the target (no arbitrary-path writes).
+        _target_dir = Path(args.skill_dir).resolve()
+
+        def _confined_write(rel_target, data):
+            p = Path(rel_target).resolve()
+            if not str(p).startswith(str(_target_dir)):
+                print(f"错误: 输出路径必须在扫描目标目录内: {_target_dir}", file=sys.stderr)
+                sys.exit(2)
+            p.write_text(data, encoding="utf-8")
 
         # 自动记录到审计日志（有籍）
         try:
@@ -1249,13 +1260,13 @@ def main():
         # Generate badge if requested
         if args.badge:
             badge_svg = generate_badge(result)
-            Path(args.badge).write_text(badge_svg, encoding="utf-8")
+            _confined_write(args.badge, badge_svg)
             print(f"Badge 已生成: {args.badge}")
 
         if args.format == "agent":
             output = generate_agent_summary(result)
             if args.output:
-                Path(args.output).write_text(output, encoding="utf-8")
+                _confined_write(args.output, output)
                 print(f"Agent summary written to: {args.output}")
             else:
                 print(output)
@@ -1264,7 +1275,7 @@ def main():
         elif args.format == "sarif":
             output = generate_sarif(result)
             if args.output:
-                Path(args.output).write_text(output, encoding="utf-8")
+                _confined_write(args.output, output)
                 print(f"SARIF 报告已写入: {args.output}")
             else:
                 print(output)
@@ -1272,7 +1283,7 @@ def main():
         elif args.format == "junit":
             output = generate_junit_xml(result)
             if args.output:
-                Path(args.output).write_text(output, encoding="utf-8")
+                _confined_write(args.output, output)
                 print(f"JUnit XML 报告已写入: {args.output}")
             else:
                 print(output)
@@ -1280,7 +1291,7 @@ def main():
         elif args.format == "json":
             output = json.dumps(asdict(result), indent=2, ensure_ascii=False)
             if args.output:
-                Path(args.output).write_text(output, encoding="utf-8")
+                _confined_write(args.output, output)
                 print(f"JSON 报告已写入: {args.output}")
             else:
                 print(output)
@@ -1311,7 +1322,7 @@ def main():
                     lines.append(f"- [{f.severity}] {f.category}: {f.message} (`{f.file}:{f.line}`)")
             output = "\n".join(lines)
             if args.output:
-                Path(args.output).write_text(output, encoding="utf-8")
+                _confined_write(args.output, output)
                 print(f"Markdown 报告已写入: {args.output}")
             else:
                 print(output)
