@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.12] - 2026-11-03
+
+### Security (remove unneeded write helpers)
+- 移除零引用的 `cache.py` / `traces.py`（无任何 import，运行时会向包目录写 cache.json/traces.json）——消除"optional helpers 越界写"面，README 目录树同步
+
 ## [1.0.11] - 2026-11-03
 
 ### Security (path-confinement hardening)
