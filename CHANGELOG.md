@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.9] - 2026-11-03
+
+### Security (zero-egress)
+- 移除依赖漏洞在线检查（OSV API 联网）：扫描器**零网络出口**——不可信目标文件夹无法触发对外请求，与"无网络"声明完全一致；检测到依赖时仅输出离线提示
+- 移除 urllib 网络库引用，全包无网络调用
+
 ## [1.0.8] - 2026-11-03
 
 ### Security (aig-skill-scan T09 fixes)
