@@ -264,8 +264,8 @@ skillgate/
 ├── dep_tree.py            # Dependency scanning
 ├── cve_database.py        # Built-in CVE DB
 ├── taint_tracker.py       # Data flow analysis
-├── skillbench.py          # Capability evaluation
-├── skillwatch.py          # Continuous monitoring
+├── skillbench.py          # Benchmark plan preview (dry-run, no execution)
+├── skillwatch.py          # Read-only monitoring (in-process scan)
 ├── autofix_pro.py         # Auto-fix code diffs
 ├── cloud_server.py        # Cloud API server
 ├── rules/                 # Custom rule examples
@@ -284,13 +284,13 @@ skillgate/
 | Local-first / offline | ✅ Yes | ❌ Cloud-only | ❌ Cloud-only | ✅ Yes |
 | AI agent skill focused | ✅ Yes | ❌ No | ❌ No | ❌ No |
 | Trust Score (single number) | ✅ Yes | ❌ No | ❌ No | ❌ No |
-| Capability benchmark | ✅ Yes | ❌ No | ❌ No | ❌ No |
-| Continuous monitoring | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
+| Benchmark plan preview (dry-run) | ✅ Yes | ❌ No | ❌ No | ❌ No |
+| Continuous monitoring (read-only) | ✅ Yes | ✅ Yes | ❌ No | ❌ No |
 | 15+ languages | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
 | Open source | ✅ MIT | ❌ Proprietary | ✅ MIT | ✅ MIT |
 | Free for commercial use | ✅ Yes | ❌ Paid | ✅ Yes | ✅ Yes |
 
-**Why SkillGate?** It focuses on AI agent skills as a distinct software category — purpose-built trust signals (scan → capability evaluation → continuous monitoring → Trust Score) that complement generic code scanners like Snyk and Semgrep.
+**Why SkillGate?** It focuses on AI agent skills as a distinct software category — purpose-built trust signals (static scan → benchmark plan preview → read-only monitoring → Trust Score) that complement generic code scanners like Snyk and Semgrep.
 
 ---
 
