@@ -545,6 +545,7 @@ SCRIPT_PATTERNS = [
     (r"child_process\.(exec|execSync|spawn|fork)\s*\(", "HIGH", "child_process 命令执行"),
     (r"require\s*\(\s*['\"]child_process['\"]\s*\)", "HIGH", "加载 child_process 命令执行"),
     (r"Invoke-Expression\b|\biex\s+", "HIGH", "PowerShell 动态执行"),
+    (r"WScript\.Shell|ActiveXObject\s*\(|\.Run\s*\(", "HIGH", "Windows 脚本宿主执行"),
     (r"\.DownloadString\s*\(|\.DownloadFile\s*\(|WebClient\s*\(|Start-BitsTransfer", "HIGH", "远程下载并执行"),
     (r"Process\.Start\s*\(", "HIGH", "进程启动"),
     (r"Runtime\.getRuntime\(\).*\.exec\s*\(", "HIGH", "Java 运行时命令执行"),
@@ -907,15 +908,31 @@ def scan_skill(skill_dir: str) -> ScanResult:
         scan_shell_file(sh_file, result)
         result.files_scanned += 1
 
-    # Scan all script-like files (JS/TS/PS1/Bat/Ruby/PHP/Perl/Go/Rust/VBS/Lua)
+    # Scan all script-like files (JS/TS/PS1/Bat/Ruby/PHP/Perl/Go/Rust/VBS/Lua/
+    # Pyw/WSF/HTA), plus extension-less files with a shebang (`#!`) line —
+    # agent skill packages routinely ship `bin/skill` executables without
+    # extensions, and skipping them would mean skipping dangerous files.
     SCRIPT_SUFFIXES = (
         ".js", ".ts", ".mjs", ".cjs", ".jsx", ".tsx",
         ".ps1", ".psm1", ".bat", ".cmd", ".rb", ".php", ".pl",
         ".go", ".rs", ".vbs", ".lua",
+        ".pyw", ".wsf", ".wsh", ".hta", ".jsfl",
     )
     for script_file in skill_path.rglob("*"):
-        if script_file.suffix.lower() not in SCRIPT_SUFFIXES:
+        if not script_file.is_file():
             continue
+        suffix = script_file.suffix.lower()
+        if suffix not in SCRIPT_SUFFIXES:
+            if suffix:
+                continue
+            # Extension-less: only scan when it starts with a shebang
+            try:
+                with open(script_file, "rb") as fh:
+                    head = fh.read(2)
+            except Exception:
+                continue
+            if head != b"#!":
+                continue
         if should_exclude(script_file):
             continue
         scan_script_file(script_file, result)
@@ -983,7 +1000,8 @@ def scan_skill(skill_dir: str) -> ScanResult:
                 if cand.suffix not in (".py", ".md", ".yml", ".yaml", ".toml", ".txt",
                                         ".js", ".ts", ".mjs", ".cjs", ".jsx", ".tsx",
                                         ".ps1", ".psm1", ".bat", ".cmd", ".rb", ".php",
-                                        ".pl", ".go", ".rs", ".vbs", ".lua", ".sh"):
+                                        ".pl", ".go", ".rs", ".vbs", ".lua", ".sh",
+                                        ".pyw", ".wsf", ".wsh", ".hta", ".jsfl"):
                     continue
                 if should_exclude(cand):
                     continue
