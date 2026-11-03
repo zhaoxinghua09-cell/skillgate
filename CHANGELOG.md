@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2026-11-03
+
+### Fixed
+- skillbench 默认 dry-run：`run` 仅预览测试定义，不执行任何目标代码；实际执行需显式 `--execute`（仅限本包配套技能，禁止未信任第三方代码）
+- SKILL.md / README 声明包范围：配套医疗合规技能库（ISO 13485 / IEC 62304 / IEC 62366 / IEC 60601 / IEC 81001 / ISO 10993 / IFU / PMS / CER 等）为明示功能并索引于 skills/SKILLS-INDEX.md；检测规则库包含危险模式字符串属检测设计，非可执行行为
+- README 移除 `npx skills` 安装引用（改为 GitHub clone），消除无 pin 引用
+
 ## [1.0.4] - 2026-11-03
 
 ### Fixed
