@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.16] - 2026-11-03
+
+### Security (no missed dangerous files; honest claims)
+- 新增数据/配置文件内容扫描 `scan_data_file`：YAML/TOML/JSON/TXT/XML/HTML/CSV/ENV/INI 等此前仅查 suppression 标记、从不扫描危险调用（技能可把命令藏进 tools.yml / instructions.txt）——现以 HIGH/MEDIUM 危险模式真实内容扫描，封"漏扫危险文件"
+- README 修正夸大声明："400+ detection patterns" 改为实数 176 条；语言覆盖声明改为实际扫描清单
+- 自扫维持 98/A+/0
+
 ## [1.0.15] - 2026-11-03
 
 ### Security (read-only promise now true)
