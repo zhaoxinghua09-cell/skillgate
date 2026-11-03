@@ -126,7 +126,11 @@ def main():
             # Confined write: export plan only inside the target folder.
             _target = Path(args.skill_dir).resolve()
             _out = Path(args.output).resolve()
-            if not str(_out).startswith(str(_target)):
+            try:
+                _ok = _out.is_relative_to(_target)
+            except (ValueError, AttributeError):
+                _ok = False
+            if not _ok:
                 print(f"错误: 输出路径必须在目标目录内: {_target}", file=sys.stderr)
                 sys.exit(2)
             _out.write_text(
