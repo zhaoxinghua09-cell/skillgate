@@ -4,6 +4,13 @@ description: Trust infrastructure for AI agent skills: static security scanning,
 version: 1.0.0
 license: MIT
 author: zhaoxinghua09-cell
+metadata:
+  openclaw:
+    requires:
+      bins:
+        - python
+    homepage: https://github.com/zhaoxinghua09-cell/skillgate
+    emoji: "🛡️"
 tags:
 - security
 - trust
