@@ -1,6 +1,6 @@
 ---
 name: skillgate
-description: Trust infrastructure for AI agent skills. Scan any skill folder for security issues, calculate a Trust Score, check dependencies, and generate a report. Use when the user asks to audit, review, or check an AI skill's safety, quality, or trustworthiness.
+description: Trust infrastructure for AI agent skills: static security scanning, machine-checkable Trust Score, dependency checks, report generation (terminal/JSON/SARIF/JUnit/Markdown/HTML), optional skill benchmarking, and registry watch. Bundles a companion medical-compliance skill library (ISO 13485 QMS, IEC 62304 SDLC, IEC 62366 usability, IEC 60601 electrical safety, IEC 81001 cybersecurity, ISO 10993 biocompatibility, IFU/labeling, PMS, CER, change control, dataset/algorithm checks) — these are documented companion skills, not hidden functionality. Use when the user asks to audit, review, or check an AI agent skill's safety, quality, or trustworthiness.
 version: 1.0.0
 license: MIT
 author: zhaoxinghua09-cell
@@ -21,6 +21,15 @@ tags:
 - The user asks *"is this skill safe?"*, *"can I trust this skill?"*, *"check this skill for problems"*.
 - You are about to **install or run a third-party skill** and want to make sure it's not malicious.
 - You want to **compare two skills** and see which one has a better Trust Score.
+
+## Package Contents & Operating Boundaries
+
+- **Static scanner only**: SkillGate analyzes skill source code with AST + regex rules; it does **not** execute the code it scans.
+- **Benchmarking is optional and dry-run by default**: `skillbench.py run` only previews test definitions and **does not execute** target code unless `--execute` is passed explicitly. Test commands run with a 30s timeout and are intended for the bundled companion skills, never for untrusted third-party code.
+- **Companion medical-compliance skill library**: the `skills/` folder bundles 14 documented compliance-check skills (ISO 13485, IEC 62304/62366/60601/81001, ISO 10993, IFU/labeling, PMS, CER, change control, dataset/algorithm quality, clinical evaluation). They are first-class features of this package, listed in `skills/SKILLS-INDEX.md`.
+- **Detection rule library contains dangerous-pattern strings by design**: SkillGate must recognize threat patterns (dynamic code execution, credential access, prompt injection, privilege escalation) to flag them. Those strings live in the rule library and are *patterns to detect*, not code SkillGate executes. Findings tagged from the rule library are annotated accordingly.
+- **Suppression transparency**: `# skillgate: ignore` markers only apply to the rule library's own self-referencing patterns; any suppressed finding is counted and disclosed in every report format (terminal/JSON/Markdown/SARIF), never silently dropped.
+- **MCP server**: `skillgate-mcp.py` exposes scan/report/badge endpoints and runs only `python` subprocesses with timeouts; no network egress, no credential reads.
 
 ## Usage
 
