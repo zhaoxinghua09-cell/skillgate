@@ -1190,8 +1190,6 @@ def main():
     scan_parser.add_argument("--badge", help="生成 SVG badge 到指定路径")
     scan_parser.add_argument("--batch", action="store_true",
                              help="批量扫描：扫描目录下所有子目录")
-    scan_parser.add_argument("--lenient", action="store_true",
-                             help="宽松模式：所有规则降一级别（减少误报）")
 
     # Quickstart subcommand
     quickstart_parser = sub.add_parser("quickstart", help="快速演示 SkillGate 怎么用")
@@ -1260,19 +1258,6 @@ def main():
                 sys.exit(0)
 
         result = scan_skill(args.skill_dir)
-
-        # Lenient mode: downgrade all findings by one level
-        if args.lenient:
-            severity_downgrade = {
-                "CRITICAL": "HIGH",
-                "HIGH": "MEDIUM",
-                "MEDIUM": "LOW",
-                "LOW": "INFO",
-                "INFO": "INFO",
-            }
-            for f in result.findings:
-                f.severity = severity_downgrade.get(f.severity, f.severity)
-            print("  (宽松模式：所有规则降一级别)")
 
         # 自动记录到审计日志（有籍）
         try:
