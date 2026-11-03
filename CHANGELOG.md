@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.27] - 2026-11-04
+
+### Compliance (claims == reality)
+- README 两处残留夸大声明 "400+ patterns" 修正为实际 176 detection patterns（Features 与 Three-gates 两节）
+- 自扫维持 98/A+/0
+
 ## [1.0.26] - 2026-11-04
 
 ### Security (contained reads; honest failures)
