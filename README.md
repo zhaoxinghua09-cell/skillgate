@@ -242,7 +242,7 @@ rules:
     severity: HIGH
     languages: [python]
     patterns:
-      - "eval\\("
+      - "eval\\("  # skillgate: ignore: rule-pattern example (self-scan)
     fix: "Use ast.literal_eval() instead"
 ```
 
