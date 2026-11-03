@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.11] - 2026-11-03
+
+### Security (path-confinement hardening)
+- `--output`/`--badge` 越界判定从字符串前缀匹配改为组件级 `is_relative_to` 精确判定——修复 `C:\target_evil` 伪装成 `C:\target` 子路径的前缀绕过
+- 移除对不存在模块 audit_log 的死代码引用
+- `medical-device-chain` HTML 报告改写到目标文档所在目录（不再写引擎目录）
+
 ## [1.0.10] - 2026-11-03
 
 ### Security (confined writes & enforced gate)
