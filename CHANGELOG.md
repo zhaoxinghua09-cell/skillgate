@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2026-11-03
+
+### Security
+- 修复抑制标记可被滥用的漏洞：`# skillgate: ignore` 仅在扫描引擎自身目录（规则库自扫）时生效；被扫描的第三方技能代码中的标记**无效**，且会被记为 `suppression-abuse` 发现——恶意技能无法再用该标记隐藏危险行为或操纵 Trust Score（扫描器评审确认此攻击面）
+- skillbench 收敛为**仅 dry-run**：移除 `--execute`，`run` 只预览/导出测试定义，不执行任何代码；实际测试仅限仓库 `tests/` pytest 套件（开发环境）
+- 说明文档同步更新（SKILL.md / README 边界声明）
+
 ## [1.0.5] - 2026-11-03
 
 ### Fixed
