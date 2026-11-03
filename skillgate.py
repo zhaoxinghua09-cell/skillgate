@@ -586,6 +586,37 @@ def scan_script_file(filepath: Path, result: ScanResult):
                 ))
 
 
+def scan_data_file(filepath: Path, result: ScanResult):
+    """Scan data/config text files (YAML/TOML/JSON/TXT/XML/HTML/CSV/ENV/INI)
+    for dangerous calls. Skills routinely keep scripts or commands inside
+    config/data files, so those files must be content-scanned too — never
+    'miss dangerous files' just because the extension is not a script one.
+    Only HIGH/MEDIUM patterns are reported (LOW download/base64 hints would
+    be noise in documents)."""
+    try:
+        content = filepath.read_text(encoding="utf-8", errors="replace")
+    except Exception:
+        return
+
+    lines = content.splitlines()
+
+    def _is_comment(l: str) -> bool:
+        s = l.lstrip()
+        return s.startswith(("#", "--", "<!--", "//", ";", "'"))
+
+    for pattern, severity, msg in SCRIPT_PATTERNS:
+        if severity == "LOW":
+            continue
+        for i, line in enumerate(lines, 1):
+            if _is_comment(line):
+                continue
+            if re.search(pattern, line, re.IGNORECASE):
+                result.findings.append(Finding(
+                    severity=severity, category="dangerous-call",
+                    message=msg, file=str(filepath), line=i
+                ))
+
+
 def scan_shell_file(filepath: Path, result: ScanResult):
     """Scan a shell script for dangerous patterns."""
     try:
@@ -897,6 +928,19 @@ def scan_skill(skill_dir: str) -> ScanResult:
         if should_exclude(md_file):
             continue
         scan_md_file(md_file, result)
+        result.files_scanned += 1
+
+    # Scan data/config text files for dangerous calls (never miss them)
+    DATA_SUFFIXES = (".yml", ".yaml", ".toml", ".txt", ".json", ".cfg", ".ini",
+                     ".xml", ".html", ".csv", ".env")
+    for data_file in skill_path.rglob("*"):
+        if data_file.suffix.lower() not in DATA_SUFFIXES:
+            continue
+        if data_file.name == "requirements.txt":
+            continue  # handled by scan_dependencies
+        if should_exclude(data_file):
+            continue
+        scan_data_file(data_file, result)
         result.files_scanned += 1
 
     # Scan dependencies for known vulnerabilities
