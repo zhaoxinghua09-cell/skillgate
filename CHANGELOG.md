@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.8] - 2026-11-03
+
+### Security (aig-skill-scan T09 fixes)
+- 封堵"早期抑制绕过"：扫描阶段不再跳过任何 `# skillgate: ignore` 标记行，抑制统一由自扫限定的 post-filter 处理——被扫技能无法再用标记提前藏毒
+- 封堵"目标配置排除 payload"：`.skillgate.yml/.yaml` 的 exclude 规则仅自扫时生效；扫描第三方技能时完全忽略其自带配置，防止静默排除危险文件
+- 回归验证：os.system+ignore 标记（2 条 CRITICAL 保留 + suppression-abuse 报出）、os.system+配置藏毒（2 条 CRITICAL 保留）、自扫 97/A+/0 critical
+
 ## [1.0.7] - 2026-11-03
 
 ### Security
