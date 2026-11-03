@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.26] - 2026-11-04
+
+### Security (contained reads; honest failures)
+- **父链链接拦截**：_link_guard 升级——候选文件父路径链上的任何 symlink/junction 目录都拦截并披露，junction 目录不再把包外文件拉入扫描
+- **读取失败不静默**：所有扫描函数（md/python/shell/script/data/frontmatter/requirements/AST）读取或解析失败时记 scan-error finding——扫描失败的文件绝不伪装成 "clean"
+- 自扫维持 98/A+/0
+
 ## [1.0.25] - 2026-11-04
 
 ### Security (all output paths link-safe)
