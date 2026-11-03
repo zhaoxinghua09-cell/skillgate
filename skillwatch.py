@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
-"""skillwatch — Skill 发布后持续监控
+"""skillwatch — Skill 发布后持续监控（只读）
 
-每周定时跑回归测试，对比基线，分数暴跌就告警。
+安全边界声明（SECURITY BOUNDARY）：
+- 本工具为**只读监控**：直接调用 SkillGate 进程内扫描函数，不执行子进程，
+  不运行被监控 skill 的任何代码，无网络请求。
+- 能力评测仅为 dry-run 预览（测试定义）。
 
 Usage:
     python skillwatch.py watch <skill_dir>
@@ -10,43 +13,35 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
-import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).parent))
+import skillgate  # noqa: E402
+
 
 def run_scan(skill_dir: str) -> dict:
-    """Run skillgate scan and return parsed JSON result."""
-    proc = subprocess.run(
-        ["python", "skillgate.py", "scan", skill_dir, "--format", "json"],
-        capture_output=True,
-        text=True,
-        cwd=str(Path(__file__).parent),
-    )
-    if proc.returncode not in (0, 1):
-        return {"error": proc.stderr}
-    return json.loads(proc.stdout)
+    """In-process SkillGate scan (no subprocess)."""
+    try:
+        result = skillgate.scan_skill(skill_dir)
+        d = dataclasses.asdict(result)
+        d["trust_score"] = result.trust_score
+        d["grade"] = result.grade
+        d["critical_count"] = result.critical_count
+        d["high_count"] = result.high_count
+        return d
+    except Exception as e:
+        return {"error": str(e)}
 
 
 def run_bench(skill_dir: str) -> dict:
-    """Run skillbench and return result."""
-    baseline_path = Path(skill_dir) / ".skillbench-baseline.json"
-    cmd = ["python", "skillbench.py", "run", skill_dir]
-    if baseline_path.exists():
-        cmd.extend(["--baseline", str(baseline_path)])
-
-    proc = subprocess.run(
-        cmd,
-        capture_output=True,
-        text=True,
-        cwd=str(Path(__file__).parent),
-    )
-    return {
-        "exit_code": proc.returncode,
-        "output": proc.stdout,
-    }
+    """Dry-run benchmark preview (no execution)."""
+    import skillbench
+    skill_name, tests = skillbench.resolve_tests(skill_dir)
+    return {"exit_code": 0, "skill": skill_name, "test_count": len(tests), "dry_run": True}
 
 
 def watch_skill(skill_dir: str, drop_threshold: int = 10):
@@ -93,17 +88,14 @@ def watch_skill(skill_dir: str, drop_threshold: int = 10):
         else:
             print(f"  ✅ 稳定/提升: {prev_score} → {current_score} ({delta:+.1f})")
 
-    # Gate 2: Capability bench
-    print(f"\n🧪 Gate 2: 能力评测...")
+    # Gate 2: Capability bench (dry-run preview)
+    print(f"\n🧪 Gate 2: 能力评测（dry-run 预览）...")
     bench_result = run_bench(skill_dir)
     if bench_result["exit_code"] == 0:
-        print(f"  ✅ 测试全部通过")
+        print(f"  ✅ 测试定义预览完成（{bench_result['test_count']} 项，未执行任何代码）")
+        print(f"  ℹ️  实际执行请使用仓库 tests/ 下的 pytest 套件")
     else:
         print(f"  ❌ 有测试失败")
-        # Print last few lines of bench output
-        lines = bench_result["output"].strip().split("\n")
-        for line in lines[-5:]:
-            print(f"     {line}")
 
     # Save history
     history.append({
