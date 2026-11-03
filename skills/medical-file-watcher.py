@@ -73,8 +73,11 @@ def _load_last_times(docs_dir: str) -> dict:
 
 
 def _save_last_times(times: dict, docs_dir: str):
-    """保存当前状态（仅写被监控目录内）。"""
+    """保存当前状态（仅写被监控目录内；拒绝符号链接重定向）。"""
     log = _log_path(docs_dir)
+    if log.is_symlink() or log.is_junction():
+        print("错误: 日志路径不能是符号链接/junction", file=sys.stderr)
+        sys.exit(2)
     log.write_text(
         json.dumps(times, indent=2, ensure_ascii=False),
         encoding="utf-8"
