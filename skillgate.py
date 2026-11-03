@@ -379,8 +379,14 @@ def scan_python_file(filepath: Path, result: ScanResult):
                 line=af.line
             ))
             ast_lines.add(af.line)  # 记录这一行已经报过了
-    except Exception:
-        pass  # AST 分析失败不影响正则扫描
+    except Exception as exc:
+        # AST analysis failing must never silently pass a file it could not
+        # fully inspect — surface it so the report reflects the gap.
+        result.findings.append(Finding(
+            severity="LOW", category="scan-error",
+            message=f"AST 分析失败（正则扫描继续）: {exc}",
+            file=str(filepath), line=0,
+        ))
 
     lines = content.splitlines()
 
@@ -488,7 +494,12 @@ def scan_md_file(filepath: Path, result: ScanResult):
     calls inside fenced code blocks (skills can hide commands in READMEs)."""
     try:
         content = filepath.read_text(encoding="utf-8", errors="replace")
-    except Exception:
+    except Exception as exc:
+        result.findings.append(Finding(
+            severity="MEDIUM", category="scan-error",
+            message=f"无法读取文件（扫描未覆盖）: {exc}",
+            file=str(filepath), line=0,
+        ))
         return
 
     lines = content.splitlines()
@@ -527,7 +538,12 @@ def scan_dependencies(skill_path: Path, result: ScanResult):
 
     try:
         content = req_file.read_text(encoding="utf-8", errors="replace")
-    except Exception:
+    except Exception as exc:
+        result.findings.append(Finding(
+            severity="MEDIUM", category="scan-error",
+            message=f"无法读取 requirements.txt（扫描未覆盖）: {exc}",
+            file=str(req_file), line=0,
+        ))
         return
 
     deps = []
@@ -585,7 +601,13 @@ def scan_script_file(filepath: Path, result: ScanResult):
     silently go missing."""
     try:
         content = filepath.read_text(encoding="utf-8", errors="replace")
-    except Exception:
+    except Exception as exc:
+        # A file that cannot be read must never silently count as "clean".
+        result.findings.append(Finding(
+            severity="MEDIUM", category="scan-error",
+            message=f"无法读取文件（扫描未覆盖）: {exc}",
+            file=str(filepath), line=0,
+        ))
         return
 
     lines = content.splitlines()
@@ -636,7 +658,12 @@ def scan_data_file(filepath: Path, result: ScanResult):
     be noise in documents)."""
     try:
         content = filepath.read_text(encoding="utf-8", errors="replace")
-    except Exception:
+    except Exception as exc:
+        result.findings.append(Finding(
+            severity="MEDIUM", category="scan-error",
+            message=f"无法读取文件（扫描未覆盖）: {exc}",
+            file=str(filepath), line=0,
+        ))
         return
 
     lines = content.splitlines()
@@ -662,7 +689,12 @@ def scan_shell_file(filepath: Path, result: ScanResult):
     """Scan a shell script for dangerous patterns."""
     try:
         content = filepath.read_text(encoding="utf-8", errors="replace")
-    except Exception:
+    except Exception as exc:
+        result.findings.append(Finding(
+            severity="MEDIUM", category="scan-error",
+            message=f"无法读取文件（扫描未覆盖）: {exc}",
+            file=str(filepath), line=0,
+        ))
         return
 
     lines = content.splitlines()
@@ -686,7 +718,12 @@ def parse_frontmatter(filepath: Path, result: ScanResult):
     """Parse YAML frontmatter from SKILL.md."""
     try:
         content = filepath.read_text(encoding="utf-8", errors="replace")
-    except Exception:
+    except Exception as exc:
+        result.findings.append(Finding(
+            severity="MEDIUM", category="scan-error",
+            message=f"无法读取 frontmatter（扫描未覆盖）: {exc}",
+            file=str(filepath), line=0,
+        ))
         return
 
     if not content.startswith("---"):
@@ -900,13 +937,24 @@ def scan_skill(skill_dir: str) -> ScanResult:
 
     # Symlink/junction guard: a crafted package must not be able to pull
     # outside files into the scan (or hide them) via links pointing out of
-    # the package. Every link is disclosed, never silently skipped.
+    # the package. Every link — including any link in the parent chain of a
+    # candidate file — is disclosed, never silently skipped.
     def _link_guard(p: Path) -> bool:
+        try:
+            rel = p.relative_to(skill_path)
+            parts = rel.parts
+        except ValueError:
+            parts = ()
+        for i in range(1, len(parts) + 1):
+            node = skill_path.joinpath(*parts[:i])
+            if node.is_symlink() or node.is_junction():
+                result.findings.append(Finding(
+                    severity="INFO", category="scan-coverage",
+                    message="Skipped symlink/junction in parent chain (target may point outside package): " + str(node.relative_to(skill_path)),
+                    file=str(node), line=0,
+                ))
+                return True
         if p.is_symlink() or p.is_junction():
-            try:
-                rel = p.relative_to(skill_path)
-            except ValueError:
-                rel = p
             result.findings.append(Finding(
                 severity="INFO", category="scan-coverage",
                 message="Skipped symlink/junction (target may point outside package): " + str(rel),
