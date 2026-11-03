@@ -898,6 +898,23 @@ def scan_skill(skill_dir: str) -> ScanResult:
         file=str(skill_path), line=0,
     ))
 
+    # Symlink/junction guard: a crafted package must not be able to pull
+    # outside files into the scan (or hide them) via links pointing out of
+    # the package. Every link is disclosed, never silently skipped.
+    def _link_guard(p: Path) -> bool:
+        if p.is_symlink() or p.is_junction():
+            try:
+                rel = p.relative_to(skill_path)
+            except ValueError:
+                rel = p
+            result.findings.append(Finding(
+                severity="INFO", category="scan-coverage",
+                message="Skipped symlink/junction (target may point outside package): " + str(rel),
+                file=str(p), line=0,
+            ))
+            return True
+        return False
+
     # Config-driven excludes (.skillgate.yml paths.exclude), with ** glob support.
     # SECURITY: the config file is honored ONLY when SkillGate scans its own
     # directory (self-scan). A scanned third-party skill must never be able to
@@ -948,14 +965,14 @@ def scan_skill(skill_dir: str) -> ScanResult:
 
     # Scan all Python files
     for py_file in skill_path.rglob("*.py"):
-        if should_exclude(py_file):
+        if should_exclude(py_file) or _link_guard(py_file):
             continue
         scan_python_file(py_file, result)
         result.files_scanned += 1
 
     # Scan all shell scripts
     for sh_file in skill_path.rglob("*.sh"):
-        if should_exclude(sh_file):
+        if should_exclude(sh_file) or _link_guard(sh_file):
             continue
         scan_shell_file(sh_file, result)
         result.files_scanned += 1
@@ -976,7 +993,7 @@ def scan_skill(skill_dir: str) -> ScanResult:
     EXEC_DIR_NAMES = {"bin", "scripts", "tools", "hooks", "plugins",
                       "extensions", "vendor"}
     for script_file in skill_path.rglob("*"):
-        if not script_file.is_file():
+        if not script_file.is_file() or _link_guard(script_file):
             continue
         suffix = script_file.suffix.lower()
         if suffix in SCRIPT_SUFFIXES:
@@ -1024,7 +1041,7 @@ def scan_skill(skill_dir: str) -> ScanResult:
     for md_file in skill_path.rglob("*.md"):
         if md_file in skill_docs:
             continue
-        if should_exclude(md_file):
+        if should_exclude(md_file) or _link_guard(md_file):
             continue
         scan_md_file(md_file, result)
         result.files_scanned += 1
@@ -1036,7 +1053,7 @@ def scan_skill(skill_dir: str) -> ScanResult:
                        ".pyc", ".pyo", ".class", ".scr", ".com", ".pif", ".cpl",
                        ".bin", ".elf", ".wasm", ".dat")
     for data_file in skill_path.rglob("*"):
-        if not data_file.is_file():
+        if not data_file.is_file() or _link_guard(data_file):
             continue
         suffix = data_file.suffix.lower()
         if suffix not in DATA_SUFFIXES and suffix not in BINARY_SUFFIXES:
@@ -1462,6 +1479,11 @@ def main():
                 ok = False
             if not ok:
                 print(f"错误: 输出路径必须在扫描目标目录内: {_target_dir}", file=sys.stderr)
+                sys.exit(2)
+            # A crafted package must never redirect report writes through a
+            # symlink/junction pointing outside the scanned folder.
+            if p.is_symlink() or p.is_junction():
+                print(f"错误: 输出路径不能是符号链接/junction: {p}", file=sys.stderr)
                 sys.exit(2)
             p.write_text(data, encoding="utf-8")
 
