@@ -3,6 +3,10 @@
 
 Exposes SkillGate as MCP tools so AI agents can call it directly.
 
+SECURITY BOUNDARY: this server performs static scanning only — it imports
+and calls SkillGate's in-process scan functions; it never spawns subprocesses,
+never executes scanned code, and makes no network requests.
+
 Usage (in your MCP config):
     "skillgate": {
       "command": "python",
@@ -11,10 +15,24 @@ Usage (in your MCP config):
 """
 from __future__ import annotations
 
+import dataclasses
 import json
 import sys
-import subprocess
 from pathlib import Path
+
+# In-process imports (no subprocess)
+sys.path.insert(0, str(Path(__file__).parent))
+import skillgate  # noqa: E402
+import skillbench  # noqa: E402
+
+
+def _scan_result_to_dict(result) -> dict:
+    d = dataclasses.asdict(result)
+    d["trust_score"] = result.trust_score
+    d["grade"] = result.grade
+    d["critical_count"] = result.critical_count
+    d["high_count"] = result.high_count
+    return d
 
 
 def send_message(msg: dict):
@@ -87,43 +105,40 @@ def handle_tools_call(params: dict) -> dict:
 
     if tool_name == "scan_skill":
         skill_dir = args.get("skill_dir", "")
-        fail_under = args.get("fail_under")
-
-        cmd = [sys.executable, str(Path(__file__).parent / "skillgate.py"),
-               "scan", skill_dir, "--format", "json"]
-
-        if fail_under:
-            cmd.extend(["--fail-under", str(fail_under)])
-
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-
         try:
-            result = json.loads(proc.stdout)
-        except json.JSONDecodeError:
-            result = {"error": proc.stderr}
-
-        return {
-            "content": [
-                {
-                    "type": "text",
-                    "text": json.dumps(result, indent=2, ensure_ascii=False)
-                }
-            ]
-        }
+            result = skillgate.scan_skill(skill_dir)
+            out = _scan_result_to_dict(result)
+            findings = []
+            for f in out.get("findings", []):
+                findings.append({
+                    "severity": f.get("severity"),
+                    "category": f.get("category"),
+                    "message": f.get("message"),
+                    "file": f.get("file"),
+                    "line": f.get("line"),
+                })
+            out["findings"] = findings
+            text = json.dumps(out, indent=2, ensure_ascii=False)
+            return {"content": [{"type": "text", "text": text}]}
+        except Exception as e:
+            return {
+                "content": [{"type": "text", "text": json.dumps({"error": str(e)}, ensure_ascii=False)}],
+                "isError": True,
+            }
 
     elif tool_name == "bench_skill":
         skill_dir = args.get("skill_dir", "")
-
-        cmd = [sys.executable, str(Path(__file__).parent / "skillbench.py"),
-               "run", skill_dir]
-
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
-
+        skill_name, tests = skillbench.resolve_tests(skill_dir)
         return {
             "content": [
                 {
                     "type": "text",
-                    "text": proc.stdout + proc.stderr
+                    "text": json.dumps({
+                        "skill": skill_name,
+                        "dry_run": True,
+                        "tests": tests,
+                        "note": "dry-run preview only; execution happens in the repository tests/ pytest suite"
+                    }, indent=2, ensure_ascii=False)
                 }
             ]
         }
