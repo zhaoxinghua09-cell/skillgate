@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.13] - 2026-11-03
+
+### Security (no missed files)
+- 新增内置语言无关脚本扫描器 `scan_script_file`，覆盖 JS/TS/MJS/CJS/JSX/TSX/PS1/PSM1/BAT/CMD/RB/PHP/PL/GO/RS/VBS/LUA——此前 JS/TS 依赖不存在的 js_analyzer 模块导致实际未扫描，README 却声称支持（"漏扫危险文件"根因）
+- 规则库含 child_process.exec / Invoke-Expression / DownloadString / shell_exec / eval(base64) / 管道 curl|sh 等 14 条多语言危险模式
+- suppression-abuse 检查后缀集同步扩展至全部扫描语言
+- README 语言清单更新为实际覆盖
+
 ## [1.0.12] - 2026-11-03
 
 ### Security (remove unneeded write helpers)
