@@ -127,10 +127,11 @@ SkillGate is built on the **LGD Trust Framework** (有籍 / 有证 / 有门禁):
 
 ### Install as an Agent Skill (recommended)
 
-One command install — works with Claude Code, Cursor, Codex, and any agent that supports the skills standard:
+Install directly from the GitHub repository — works with Claude Code, Cursor, Codex, and any agent that supports the skills standard:
 
 ```bash
-npx skills add zhaoxinghua09-cell/skillgate
+git clone https://github.com/zhaoxinghua09-cell/skillgate.git
+# then symlink or copy the skillgate folder into your agent's skills directory
 ```
 
 Then just ask your agent: *"check if this skill is safe"* — it will use SkillGate automatically.
@@ -331,11 +332,11 @@ Three gates, one score:
 
 What's next for SkillGate?
 
-- [x] **v1.0.0** — Basic security scanner + Trust Score (released!)
-- [ ] **v1.1.0** — MCP Server integration — let other agents call SkillGate as a tool
-- [ ] **v1.2.0** — VSCode extension — inline diagnostics while you write skills
-- [ ] **v1.3.0** — GitHub App — automatically comment on PRs with Trust Score
-- [ ] **v1.4.0** — Cloud service — team dashboards, shared policy, continuous monitoring
+- **v1.0.0** — Basic security scanner + Trust Score (released!)
+- **v1.1.0** — MCP Server integration — let other agents call SkillGate as a tool
+- **v1.2.0** — VSCode extension — inline diagnostics while you write skills
+- **v1.3.0** — GitHub App — automatically comment on PRs with Trust Score
+- **v1.4.0** — Cloud service — team dashboards, shared policy, continuous monitoring
 
 Want to help build one of these? Check out [CONTRIBUTING.md](CONTRIBUTING.md)!
 
