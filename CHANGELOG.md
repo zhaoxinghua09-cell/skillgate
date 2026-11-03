@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.22] - 2026-11-04
+
+### Security (no overstated approvals; honest claims)
+- **badge 严重级门控**：Trust Score 徽章不再以分数显示绿色 pass——存在 CRITICAL → red/fail、存在 HIGH → orange/caution（与 verdict 判定一致，杜绝"分数高却亮绿"误导）
+- 删除 skill-card.md 自夸声明 "ready for commercial/non-commercial use"（输出是证据供审查，始终需人工复核）
+- 清理 compute_trust_score 死代码（network bonus 从未执行）
+- 自扫维持 98/A+/0
+
 ## [1.0.21] - 2026-11-04
 
 ### Compliance (ClawHub card & declaration alignment)
