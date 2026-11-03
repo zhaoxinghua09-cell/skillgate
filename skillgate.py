@@ -404,16 +404,12 @@ def scan_python_file(filepath: Path, result: ScanResult):
         return (single_quotes % 2 == 1) or (double_quotes % 2 == 1)
 
     # Helper: check if line has skillgate: ignore suppression
+    # NOTE: line-level suppression is applied ONLY in the post-filter below,
+    # which gates it on self-scan. Skipping findings here (at scan time) would
+    # let any scanned skill suppress findings before the self-scan-only check
+    # runs — an early-suppression bypass. All findings are therefore recorded
+    # first and suppression is decided centrally.
     def is_suppressed(line_idx: int) -> bool:
-        """Check if the current line or previous line has # skillgate: ignore"""
-        # Check current line
-        if 0 < line_idx <= len(lines):
-            if "skillgate: ignore" in lines[line_idx - 1]:
-                return True
-        # Check previous line
-        if line_idx > 1:
-            if "skillgate: ignore" in lines[line_idx - 2]:
-                return True
         return False
 
     # 1. Dangerous code patterns
@@ -796,13 +792,20 @@ def scan_skill(skill_dir: str) -> ScanResult:
     # Default excluded directories
     DEFAULT_EXCLUDES = {"tests", "test", "docs", "doc", ".git", "__pycache__", "node_modules"}
 
-    # Config-driven excludes (.skillgate.yml paths.exclude), with ** glob support
+    # Config-driven excludes (.skillgate.yml paths.exclude), with ** glob support.
+    # SECURITY: the config file is honored ONLY when SkillGate scans its own
+    # directory (self-scan). A scanned third-party skill must never be able to
+    # silently exclude its own payload via a bundled config, so for any other
+    # target the config is ignored entirely.
+    _engine_dir = Path(__file__).resolve().parent
+    _self_scan = _engine_dir == skill_path.resolve()
     _config_excludes = []
-    for _pat in load_config_excludes(skill_path):
-        try:
-            _config_excludes.append(re.compile(_glob_to_regex(_pat)))
-        except Exception:
-            pass
+    if _self_scan:
+        for _pat in load_config_excludes(skill_path):
+            try:
+                _config_excludes.append(re.compile(_glob_to_regex(_pat)))
+            except Exception:
+                pass
 
     def should_exclude(filepath: Path) -> bool:
         """Check if a file should be excluded from scanning."""
