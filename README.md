@@ -261,7 +261,7 @@ skillgate/
 ├── dependency_manager.py # Dependency handling
 ├── scorecard.py          # Scorecard helpers
 ├── skillbench.py         # Benchmark plan preview (dry-run, no execution)
-├── skillwatch.py         # Read-only monitoring (in-process scan)
+├── skillwatch.py         # Read-only monitoring (in-process scan; optional --history)
 ├── skillgate-mcp.py      # MCP server (in-process, no subprocess)
 ├── skills/               # 17 companion skills (12 compliance + 2 quality + 3 workflow)
 ├── llms.txt              # LLM-friendly index
