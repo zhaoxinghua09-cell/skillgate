@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.18] - 2026-11-03
+
+### Security (severity-gated verdicts; no skipped executables)
+- **严重级优先判定**：存在 CRITICAL → 一律 UNSAFE do not install；存在 HIGH → CAUTION do not install until resolved——扫描器不再以分数掩盖严重发现（此前 score≥90 即使带 HIGH/CRITICAL 仍判 SAFE）
+- **二进制可执行文件不再静默跳过**：.exe/.dll/.so/.jar/.apk/.msi/.pyc/.class/.scr/.wasm 等无法静态分析的可执行负载报 MEDIUM binary-payload（需人工/厂商审查）
+- 自扫维持 98/A+/0
+
 ## [1.0.17] - 2026-11-03
 
 ### Security (never skip script-like files)
