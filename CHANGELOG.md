@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.28] - 2026-11-04
+
+### Security (honest batch exit; contained output)
+- **批量扫描失败不静默**：扫描失败/异常的目录计入总计与通过率分母、记 CRITICAL scan-error finding，任何失败目录都使 batch exit code=1——不再出现"失败目录消失且 exit 0"
+- 回归实测：含 HIGH 目录 batch → exit 1；全通过 → exit 0；目录不存在 → exit 2
+- 复核输出面：credential findings 只输出静态规则文案不泄露匹配值；报告/badge 写入限定目标目录内
+- 自扫维持 98/A+/0
+
 ## [1.0.27] - 2026-11-04
 
 ### Compliance (claims == reality)
