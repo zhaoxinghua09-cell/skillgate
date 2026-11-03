@@ -133,6 +133,9 @@ def main():
             if not _ok:
                 print(f"错误: 输出路径必须在目标目录内: {_target}", file=sys.stderr)
                 sys.exit(2)
+            if _out.is_symlink() or _out.is_junction():
+                print(f"错误: 输出路径不能是符号链接/junction: {_out}", file=sys.stderr)
+                sys.exit(2)
             _out.write_text(
                 json.dumps({"skill": skill_name, "dry_run": True, "tests": tests}, indent=2, ensure_ascii=False),
                 encoding="utf-8")
