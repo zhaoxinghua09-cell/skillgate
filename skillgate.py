@@ -758,13 +758,6 @@ def compute_trust_score(result: ScanResult) -> int:
     # Clamp to 0-100
     return max(0, min(100, score))
 
-    # Zero dependencies bonus
-    has_network = any(f.category == "network" for f in result.findings)
-    if not has_network:
-        score += 2
-
-    return max(0, min(100, score))
-
 
 def grade_from_score(score: int) -> str:
     if score >= 90: return "A+"
@@ -780,19 +773,30 @@ def generate_badge(result: ScanResult) -> str:
     score = result.trust_score
     grade = result.grade
 
-    # Color based on score
-    if score >= 90:
+    # Severity-first gating: a badge must never look green for a skill that
+    # still carries CRITICAL/HIGH findings, no matter the numeric score.
+    if result.critical_count > 0:
+        color = "red"
+        label = "fail"
+    elif result.high_count > 0:
+        color = "orange"
+        label = "caution"
+    elif score >= 90:
         color = "brightgreen"
+        label = "pass"
     elif score >= 75:
         color = "green"
+        label = "pass"
     elif score >= 60:
         color = "yellow"
+        label = "caution"
     elif score >= 40:
         color = "orange"
+        label = "review"
     else:
         color = "red"
+        label = "fail"
 
-    label = "trust score"
     value = f"{score}/100 {grade}"
 
     # Simple SVG badge (shields.io style)
