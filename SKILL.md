@@ -25,10 +25,10 @@ tags:
 ## Package Contents & Operating Boundaries
 
 - **Static scanner only**: SkillGate analyzes skill source code with AST + regex rules; it does **not** execute the code it scans.
-- **Benchmarking is optional and dry-run by default**: `skillbench.py run` only previews test definitions and **does not execute** target code unless `--execute` is passed explicitly. Test commands run with a 30s timeout and are intended for the bundled companion skills, never for untrusted third-party code.
+- **Benchmarking is dry-run only**: `skillbench.py run` previews/export test definitions and **never executes** code. No `--execute` flag exists; real test execution happens only in the repository's own `tests/` pytest suite (developer environment).
 - **Companion medical-compliance skill library**: the `skills/` folder bundles 14 documented compliance-check skills (ISO 13485, IEC 62304/62366/60601/81001, ISO 10993, IFU/labeling, PMS, CER, change control, dataset/algorithm quality, clinical evaluation). They are first-class features of this package, listed in `skills/SKILLS-INDEX.md`.
 - **Detection rule library contains dangerous-pattern strings by design**: SkillGate must recognize threat patterns (dynamic code execution, credential access, prompt injection, privilege escalation) to flag them. Those strings live in the rule library and are *patterns to detect*, not code SkillGate executes. Findings tagged from the rule library are annotated accordingly.
-- **Suppression transparency**: `# skillgate: ignore` markers only apply to the rule library's own self-referencing patterns; any suppressed finding is counted and disclosed in every report format (terminal/JSON/Markdown/SARIF), never silently dropped.
+- **Suppression markers cannot be abused**: `# skillgate: ignore` markers are honored **only when SkillGate scans its own directory** (rule library self-scan). Markers inside scanned third-party skills have **no effect** and are reported as a `suppression-abuse` finding, so a malicious skill can never hide findings or manipulate its Trust Score. Every suppressed finding is counted and disclosed in all report formats, never silently dropped.
 - **MCP server**: `skillgate-mcp.py` exposes scan/report/badge endpoints and runs only `python` subprocesses with timeouts; no network egress, no credential reads.
 
 ## Usage
