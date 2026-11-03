@@ -14,7 +14,7 @@ metadata:
 
 ## Description: <br>
 Skillgate is a local-first trust-scoring engine for AI agent skills. It scans a skill folder or repository for security issues (prompt injection, credential leakage, dangerous runtime calls, dependency risk), computes a machine-checkable Trust Score, runs skill benchmarks, and watches registries for newly published or changed skills. Use when the user wants to audit, score, or monitor the safety of AI agent skills before installing or publishing them. <br>
-This skill is ready for commercial/non-commercial use. <br>
+Outputs are evidence for review — always combine with manual review before deployment. <br>
 
 ## Publisher: <br>
 [zhaoxinghua09-cell](https://clawhub.ai/zhaoxinghua09-cell) <br>
