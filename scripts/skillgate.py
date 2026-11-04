@@ -289,7 +289,7 @@ class ScanResult:
     frontmatter: dict = field(default_factory=dict)
     trust_score: int = 0
     grade: str = ""
-    rule_version: str = "v3.1.2"  # 规则版本号（有籍）
+    rule_version: str = "v3.1.3"  # 规则版本号（有籍）
 
     @property
     def critical_count(self): return len([f for f in self.findings if f.severity == "CRITICAL"])
@@ -684,17 +684,8 @@ def scan_python_file(filepath: Path, result: ScanResult):
                     message=msg, file=str(filepath), line=i
                 ))
 
-    # 6. AST analysis (higher precision, lower false positive)
-    if ast_analyze:
-        try:
-            ast_findings = ast_analyze(filepath)
-            for af in ast_findings:
-                result.findings.append(Finding(
-                    severity=af.severity, category="ast-analysis",
-                    message=af.message, file=str(filepath), line=af.line
-                ))
-        except Exception:
-            pass
+    # 6. AST analysis 已在函数开头（步骤 1，含行级去重）执行；
+    #    v3.1.3 修复：此处原重复调用 AST 造成同一命中双计（[AST]+无前缀各一条），已移除。
 
 
 def scan_md_file(filepath: Path, result: ScanResult):
