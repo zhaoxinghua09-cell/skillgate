@@ -1,86 +1,55 @@
-# SkillGate
+﻿# SkillGate
 
-> Trust infrastructure for AI
- agent skills.
+> Trust infrastructure for AI agent skills.
 
 ## What is this?
 
-SkillGate s
-cans AI agent skills for security issues, cal
-culates a Trust Score, and generates a report
-. It's like Snyk for AI skills — but open s
-ource, local-first, and free.
+SkillGate scans AI agent skills for security issues, calculates a Trust Score, and generates a report. It's like Snyk for AI skills — but open source, local-first, and free.
 
-## When to use
- this
+## When to use this
 
 Use SkillGate when:
-- You want to audi
-t or review an AI agent skill for security is
-sues
-- You ask "is this skill safe?" or "can 
-I trust this skill?"
-- You are about to insta
-ll a third-party skill and want to check it f
-irst
-- You want to compare two skills and see
- which one is more trustworthy
+- You want to audit or review an AI agent skill for security issues
+- You ask "is this skill safe?" or "can I trust this skill?"
+- You are about to install a third-party skill and want to check it first
+- You want to compare two skills and see which one is more trustworthy
 
-## Quick star
-t
+## Quick start
 
 ```bash
 # Scan a skill folder
-python scrip
-ts/skillgate.py scan ./path/to/skill/
+python scripts/skillgate.py scan ./path/to/skill/
 
-# Get 
-JSON output
-python scripts/skillgate.py scan 
-./path/to/skill/ --format json
+# Get JSON output
+python scripts/skillgate.py scan ./path/to/skill/ --format json
 
-# Get HTML re
-port
-python scripts/skillgate.py scan ./path/
-to/skill/ --format html
+# Get machine-readable reports (JSON / SARIF / JUnit / Markdown / agent)
+python scripts/skillgate.py scan ./path/to/skill/ --format json
+python scripts/skillgate.py scan ./path/to/skill/ --format sarif
+python scripts/skillgate.py scan ./path/to/skill/ --format junit
 ```
 
-## What it check
-s
+## What it checks
 
 - Secrets (API keys, tokens, passwords)
-- 
-Dangerous code (eval, exec, os.system)
-- Vuln
-erable dependencies
-- SKILL.md quality (missi
-ng description, version, license)
-- Suspiciou
-s network calls
-- Unnecessary file system acc
-ess
+- Dangerous code (eval, exec, os.system)
+- Vulnerable dependencies
+- SKILL.md quality (missing description, version, license)
+- Suspicious network calls
+- Unnecessary file system access
 
 ## Trust Score
 
-Start at 100, subtract b
-y severity:
+Start at 100, subtract by severity:
 - CRITICAL: -15
 - HIGH: -8
-- MEDI
-UM: -3
+- MEDIUM: -3
 - LOW: -1
 
-Grades: A+ (90+), A (80+), 
-B (70+), C (60+), D (<60)
+Grades: A+ (90+), A (80+), B (70+), C (60+), D (<60)
 
 ## Known limits
 
--
- Static scanner only — doesn't run the skil
-l
+- Static scanner only — doesn't run the skill
 - Catches known patterns, not zero-days
-- C
-lean scan = "no obvious red flags", not "100%
- safe"
-
-
+- Clean scan = "no obvious red flags", not "100% safe"
