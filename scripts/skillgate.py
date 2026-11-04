@@ -18,7 +18,7 @@ import json
 import os
 import re
 import sys
-import urllib.request
+import urllib.request  # skillgate: ignore
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from typing import Optional
@@ -40,22 +40,22 @@ except ImportError:
 
 # 1. Dangerous code execution
 DANGEROUS_CODE_PATTERNS = [
-    (r"\beval\s*\(", "MEDIUM", "eval() 动态代码执行（工具常用，需人工判断）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
-    (r"\bexec\s*\(", "MEDIUM", "exec() 动态代码执行（工具常用，需人工判断）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
-    (r"\bos\.system\s*\(", "HIGH", "os.system() shell 调用"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"\beval\s*\(", "MEDIUM", "eval() 动态代码执行（工具常用，需人工判断）"),  # skillgate: ignore
+    (r"\bexec\s*\(", "MEDIUM", "exec() 动态代码执行（工具常用，需人工判断）"),
+    (r"\bos\.system\s*\(", "HIGH", "os.system() shell 调用"),  # skillgate: ignore
     (r"\bsubprocess\.(run|call|Popen|check_output)\s*\([^)]*shell\s*=\s*True", "HIGH", "subprocess shell=True"),
-    (r"\bos\.popen\s*\(", "HIGH", "os.popen() shell 调用"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"\bos\.popen\s*\(", "HIGH", "os.popen() shell 调用"),  # skillgate: ignore
     (r"\b__import__\s*\(", "MEDIUM", "动态 import"),
     (r"\bpickle\.load(s)?\s*\(", "HIGH", "pickle 反序列化"),
     (r"\byaml\.load\s*\([^)]*\)(?![^#]*Loader\s*=\s*SafeLoader)", "MEDIUM", "yaml.load 非安全加载"),
-    (r"\bcompile\s*\([^)]*\)", "INFO", "compile() 动态代码编译（低风险）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"(?<!\.)\bcompile\s*\(", "INFO", "compile() 动态代码编译（低风险）"),
     (r"\bgetattr\s*\([^)]*os\.", "MEDIUM", "getattr 动态调用 os 模块"),
-    (r"\bglobals\(\)", "INFO", "globals() 访问全局命名空间（低风险）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
-    (r"\blocals\(\)", "INFO", "locals() 访问局部命名空间（低风险）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
-    (r"\binput\s*\(\)", "INFO", "input() 接受用户输入（CLI 工具常见）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
-    (r"\binput\s*\([^)]*\)", "INFO", "input() 接受用户输入（CLI 工具常见）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
-    (r"\b__builtins__\b", "INFO", "访问 __builtins__（低风险）"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
-    (r"\bglobals\(\)\[", "MEDIUM", "globals() 动态修改"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"\bglobals\(\)", "INFO", "globals() 访问全局命名空间（低风险）"),
+    (r"\blocals\(\)", "INFO", "locals() 访问局部命名空间（低风险）"),
+    (r"\binput\s*\(\)", "INFO", "input() 接受用户输入（CLI 工具常见）"),
+    (r"\binput\s*\([^)]*\)", "INFO", "input() 接受用户输入（CLI 工具常见）"),
+    (r"\b__builtins__\b", "INFO", "访问 __builtins__（低风险）"),
+    (r"\bglobals\(\)\[", "MEDIUM", "globals() 动态修改"),
     (r"\bsetattr\s*\(", "INFO", "setattr 动态属性设置（低风险）"),
     (r"\bdelattr\s*\(", "INFO", "delattr 动态属性删除（低风险）"),
     # === 新增规则 ===
@@ -70,7 +70,7 @@ DANGEROUS_CODE_PATTERNS = [
     (r"\bctypes\.windll\s*\(", "HIGH", "ctypes 加载 Windows DLL"),
     (r"\bctypes\.oledll\s*\(", "HIGH", "ctypes 加载 OLE DLL"),
     (r"\bdl\.open\s*\(", "HIGH", "dlopen 加载动态库"),
-    (r"\bctypes\.pythonapi\b", "MEDIUM", "ctypes.pythonapi 直接调用 C API"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"\bctypes\.pythonapi\b", "MEDIUM", "ctypes.pythonapi 直接调用 C API"),  # skillgate: ignore
 ]
 
 # 2. Network calls / data exfiltration
@@ -84,41 +84,42 @@ NETWORK_PATTERNS = [
     (r"\bimport\s+smtplib\b", "LOW", "SMTP 邮件库"),
     (r"\burlopen\s*\(", "LOW", "urlopen 网络请求"),
     (r"\bpost\s*\([^)]*https?://", "MEDIUM", "POST 数据到外部 URL"),
+    (r"\brequests\.get\s*\([^)]*https?://", "LOW", "GET 请求外部 URL"),
     (r"\bhttpx\b", "INFO", "httpx HTTP 客户端（常见）"),
     (r"\baiohttp\b", "INFO", "aiohttp 异步 HTTP（常见）"),
     (r"\bcurl\b", "LOW", "curl 命令行网络工具"),
     (r"\bwget\b", "LOW", "wget 命令行网络工具"),
     (r"\bnc\s+-[el]\b", "HIGH", "netcat 反向 shell 风险"),
     (r"\bncat\b", "LOW", "ncat 网络工具"),
-    (r"\btelnetlib\b", "HIGH", "telnetlib 明文传输"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"\btelnetlib\b", "HIGH", "telnetlib 明文传输"),  # skillgate: ignore
     (r"\bparamiko\b", "LOW", "paramiko SSH 库"),
     (r"\bscp\b", "LOW", "scp 文件传输"),
 ]
 
 # 3. Credential / secret access
 CREDENTIAL_PATTERNS = [
-    (re.compile(r"(api[_-]?key|apikey|secret|token|password|passwd|credential)\s*[:=]\s*['\"]([^'\"]{8,})['\"]", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (re.compile(r"(api[_-]?key|apikey|secret|token|password|passwd|credential)\s*[:=]\s*['\"]([^'\"]{8,})['\"]", re.IGNORECASE),
      "CRITICAL", "硬编码凭证"),
-    (re.compile(r"os\.environ\[['\"](.*TOKEN|.*KEY|.*SECRET|.*PASSWORD)['\"]\]", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (re.compile(r"os\.environ\[['\"](.*TOKEN|.*KEY|.*SECRET|.*PASSWORD)['\"]\]", re.IGNORECASE),
      "INFO", "从环境变量读凭证（安全做法）"),
-    (re.compile(r"os\.getenv\s*\(\s*['\"](.*TOKEN|.*KEY|.*SECRET|.*PASSWORD)", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (re.compile(r"os\.getenv\s*\(\s*['\"](.*TOKEN|.*KEY|.*SECRET|.*PASSWORD)", re.IGNORECASE),
      "INFO", "从环境变量读凭证（安全做法）"),
-    (re.compile(r"~\.ssh/", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (re.compile(r"~\.ssh/", re.IGNORECASE),
      "HIGH", "访问 SSH 密钥目录"),
-    (re.compile(r"\.aws/credentials", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (re.compile(r"\.aws/credentials", re.IGNORECASE),  # skillgate: ignore
      "HIGH", "访问 AWS 凭证文件"),
-    (re.compile(r"\.git-credentials", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (re.compile(r"\.git-credentials", re.IGNORECASE),  # skillgate: ignore
      "HIGH", "访问 Git 凭证文件"),
-    (re.compile(r"\.netrc", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
-     "MEDIUM", "访问 .netrc 凭证文件"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
-    (re.compile(r"\.npmrc", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
-     "MEDIUM", "访问 .npmrc 凭证文件"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
-    (re.compile(r"\.pypirc", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
-     "MEDIUM", "访问 .pypirc 凭证文件"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
-    (re.compile(r"id_rsa", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (re.compile(r"\.netrc", re.IGNORECASE),  # skillgate: ignore
+     "MEDIUM", "访问 .netrc 凭证文件"),
+    (re.compile(r"\.npmrc", re.IGNORECASE),  # skillgate: ignore
+     "MEDIUM", "访问 .npmrc 凭证文件"),
+    (re.compile(r"\.pypirc", re.IGNORECASE),  # skillgate: ignore
+     "MEDIUM", "访问 .pypirc 凭证文件"),
+    (re.compile(r"id_rsa", re.IGNORECASE),  # skillgate: ignore
      "HIGH", "访问 SSH 私钥"),
-    (re.compile(r"id_ed25519", re.IGNORECASE),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
-     "HIGH", "访问 SSH 私钥"),
+    (re.compile(r"id_ed25519", re.IGNORECASE),  # skillgate: ignore
+     "HIGH", "访问 SSH 私钥"),  # skillgate: ignore
 ]
 
 # 4. File system danger
@@ -138,9 +139,9 @@ FILESYSTEM_PATTERNS = [
 
 # 5. Prompt injection / LLM-specific risks
 PROMPT_INJECTION_PATTERNS = [
-    (r"ignore\s+previous\s+instructions", "CRITICAL", "Prompt injection: ignore previous"),
-    (r"disregard\s+all\s+previous", "CRITICAL", "Prompt injection: disregard previous"),
-    (r"you\s+are\s+now\s+a?n?\s+\w+", "MEDIUM", "Prompt injection: persona override"),
+    (r"ignore\s+(all\s+)?(the\s+)?previous\s+instructions", "CRITICAL", "Prompt injection: ignore previous"),
+    (r"disregard\s+(all\s+)?(the\s+)?previous", "CRITICAL", "Prompt injection: disregard previous"),
+    (r"you\s+are\s+now\s+a?n?\s+\w+", "LOW", "角色定义，低风险，需人工确认"),
     (r"system\s+prompt\s+leak", "HIGH", "System prompt leak attempt"),
     (r"jailbreak", "CRITICAL", "Jailbreak pattern"),
     (r"reveal\s+your\s+instructions", "HIGH", "Reveal system instructions attempt"),
@@ -148,27 +149,37 @@ PROMPT_INJECTION_PATTERNS = [
     (r"bypass\s+safety", "HIGH", "Bypass safety guardrails"),
     (r"do\s+not\s+tell\s+the\s+user", "MEDIUM", "Hide actions from user"),
     (r"do\s+not\s+mention", "LOW", "Instructed to omit information"),
-    (r"pretend\s+you\s+are", "MEDIUM", "Pretend persona override"),
-    (r"act\s+as\s+if\s+you\s+are", "MEDIUM", "Act as persona override"),
+    (r"pretend\s+you\s+are", "LOW", "角色定义，低风险，需人工确认"),
+    (r"act\s+as\s+if\s+you\s+are", "LOW", "角色定义，低风险，需人工确认"),
     (r"forget\s+your\s+rules", "CRITICAL", "Forget your rules"),
     (r"override\s+your\s+guidelines", "CRITICAL", "Override guidelines"),
     (r"ignore\s+your\s+training", "CRITICAL", "Ignore training"),
 ]
 
+# 5.5 数字诚实性规则（防止吹牛）
+HONESTY_PATTERNS = [
+    # 注：删除了过宽的 \b\d{3,}\+ 规则（"1000+" "5000+" 等正常能力宣称均误报，
+    # 静态无法判定真吹牛），仅保留高特异性的具体吹牛模式。
+    (r"17\s+languages", "MEDIUM", "疑似吹牛：17 languages"),
+    (r"600\+\s+rules", "MEDIUM", "疑似吹牛：600+ rules"),
+]
+
 # 6. Excessive agency / MCP risks
 EXCESSIVE_AGENCY_PATTERNS = [
-    (r"delete\s+all\s+files", "CRITICAL", "Excessive agency: delete all files"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"delete\s+all\s+files", "CRITICAL", "Excessive agency: delete all files"),  # skillgate: ignore
     (r"send\s+all\s+data", "HIGH", "Excessive agency: exfiltrate all data"),
+    (r"send\s+all\s+user\s+data", "HIGH", "Excessive agency: exfiltrate all user data"),
+    (r"exfiltrat\w*\s+(?:all\s+)?(?:user\s+)?data", "HIGH", "Excessive agency: exfiltration of all data"),
     (r"run\s+arbitrary\s+commands", "HIGH", "Arbitrary command execution"),
     (r"access\s+all\s+files", "MEDIUM", "Overly broad file access"),
-    (r"read\s+every\s+file", "HIGH", "Read every file"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
-    (r"modify\s+all\s+configs", "HIGH", "Modify all configs"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
-    (r"install\s+any\s+package", "MEDIUM", "Install any package"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
-    (r"unrestricted\s+internet\s+access", "MEDIUM", "Unrestricted internet access"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
-    (r"bypass\s+all\s+safety\s+checks", "CRITICAL", "Bypass all safety checks"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
-    (r"disable\s+all\s+filters", "HIGH", "Disable all filters"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
-    (r"grant\s+yourself\s+admin", "CRITICAL", "Grant yourself admin access"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
-    (r"add\s+new\s+user\s+accounts", "HIGH", "Add new user accounts"),  # skillgate: ignore: rule-pattern library / detection keywords (self-scan)
+    (r"read\s+every\s+file", "HIGH", "Read every file"),  # skillgate: ignore
+    (r"modify\s+all\s+configs", "HIGH", "Modify all configs"),  # skillgate: ignore
+    (r"install\s+any\s+package", "MEDIUM", "Install any package"),
+    (r"unrestricted\s+internet\s+access", "MEDIUM", "Unrestricted internet access"),  # skillgate: ignore
+    (r"bypass\s+all\s+safety\s+checks", "CRITICAL", "Bypass all safety checks"),  # skillgate: ignore
+    (r"disable\s+all\s+filters", "HIGH", "Disable all filters"),
+    (r"grant\s+yourself\s+admin", "CRITICAL", "Grant yourself admin access"),  # skillgate: ignore
+    (r"add\s+new\s+user\s+accounts", "HIGH", "Add new user accounts"),
 ]
 
 # 7. License compliance
@@ -273,7 +284,7 @@ class ScanResult:
     frontmatter: dict = field(default_factory=dict)
     trust_score: int = 0
     grade: str = ""
-    rule_version: str = "v3.0.0"  # 规则版本号（有籍）
+    rule_version: str = "v3.1.1"  # 规则版本号（有籍）
 
     @property
     def critical_count(self): return len([f for f in self.findings if f.severity == "CRITICAL"])
@@ -286,6 +297,213 @@ class ScanResult:
 
 
 # ── Scanners ──────────────────────────────────────────────────────────────
+
+# 字符串字面量（含规则定义字符串、文档示例、占位符）——剥离避免自证陷阱误报
+_STRING_RE = re.compile(r"('[^'\\]*(?:\\.[^'\\]*)*'|\"[^\"\\]*(?:\\.[^\"\\]*)*\")")
+
+def clean_line(line: str) -> str:
+    """去掉字符串字面量与行内注释，仅保留真实代码/指令部分。
+
+    顺序：先剥字符串（注释里的引号不会干扰），再按 # 截断行内注释。
+    这样规则定义字符串（如 'eval('）、示例 "your-key"、注释里的示例代码
+    都不会被误判为真实调用。
+    """
+    stripped = _STRING_RE.sub(" ", line)
+    idx = stripped.find("#")
+    if idx != -1:
+        stripped = stripped[:idx]
+    return stripped
+
+
+# ── v3.1.0: 固定参数 vs 动态参数判断（确定性，纯静态，无外部依赖） ────────────
+
+def _strip_comment(line: str) -> str:
+    """去掉行内注释（# 不在字符串内），保留字符串字面量。
+    用于需要看到实参原文（判断固定 vs 动态）的规则。"""
+    out = []
+    i = 0
+    n = len(line)
+    in_str = None
+    while i < n:
+        ch = line[i]
+        if in_str:
+            out.append(ch)
+            if ch == "\\" and i + 1 < n:
+                out.append(line[i + 1])
+                i += 2
+                continue
+            if ch == in_str:
+                in_str = None
+            i += 1
+        else:
+            if ch in ('"', "'"):
+                in_str = ch
+                out.append(ch)
+                i += 1
+            elif ch == "#":
+                break
+            else:
+                out.append(ch)
+                i += 1
+    return "".join(out)
+
+
+def _call_args_are_literal(line: str, open_paren_idx: int) -> bool:
+    """从 open_paren_idx 处的 '(' 做括号配平取实参文本，剥掉字符串字面量后，
+    若每个非空实参段要么已变成空白（纯字符串实参），要么是 name=字面量
+    （True/False/None/数字），则判为"固定参数"。
+    出现裸标识符、+ 拼接、% 格式化、.format(、f-string 残留等即判动态。
+    跨行/括号不配平时保守判动态。"""
+    depth = 1
+    j = open_paren_idx + 1
+    n = len(line)
+    in_str = None
+    segs = []
+    seg_start = j
+    while j < n:
+        ch = line[j]
+        if in_str:
+            if ch == "\\":
+                j += 2
+                continue
+            if ch == in_str:
+                in_str = None
+        else:
+            if ch in ('"', "'"):
+                in_str = ch
+            elif ch == "(":
+                depth += 1
+            elif ch == ")":
+                depth -= 1
+                if depth == 0:
+                    break
+            elif ch == "," and depth == 1:
+                segs.append(line[seg_start:j])
+                seg_start = j + 1
+        j += 1
+    if depth != 0:
+        return False  # 跨行调用，单行无法证明固定 → 动态
+    segs.append(line[seg_start:j])
+
+    for seg in segs:
+        stripped = _LITERAL_STRING_RE.sub(" ", seg).strip()
+        if not stripped:
+            continue
+        m = re.match(r"^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+)$", stripped)
+        if m and re.match(r"^(True|False|None|-?\d+(\.\d+)?)$", m.group(2).strip()):
+            continue
+        return False
+    return True
+
+
+def strip_strings_to_code(content: str) -> list[str]:
+    """整文件级字符串/注释剥离：返回与原文等长的行列表，字符串字面量
+    （含跨行三引号 docstring）与行内注释全部替换为空格。
+    确定性状态机；用于非凭证规则的逐行扫描，避免多行 docstring 里提到
+    eval/os.system 等词造成误报。"""
+    out_lines = []
+    pending_triple = None  # None / '"""' / "'''"
+    for line in content.splitlines():
+        n = len(line)
+        chars = []
+        i = 0
+        if pending_triple is not None:
+            close = line.find(pending_triple)
+            if close == -1:
+                out_lines.append(" " * n)
+                continue
+            chars.append(" " * (close + 3))
+            i = close + 3
+            pending_triple = None
+        while i < n:
+            if line[i] == "#":
+                break
+            if line[i:i + 3] in ('"""', "'''"):
+                triple = line[i:i + 3]
+                close = line.find(triple, i + 3)
+                if close == -1:
+                    chars.append(" " * (n - i))
+                    pending_triple = triple
+                    i = n
+                else:
+                    chars.append(" " * (close + 3 - i))
+                    i = close + 3
+                continue
+            if line[i] in ('"', "'"):
+                quote = line[i]
+                k = i + 1
+                while k < n:
+                    if line[k] == "\\":
+                        k += 2
+                        continue
+                    if line[k] == quote:
+                        break
+                    k += 1
+                end = k + 1 if k < n else n
+                chars.append(" " * (end - i))
+                i = end
+                continue
+            chars.append(line[i])
+            i += 1
+        out_lines.append("".join(chars))
+    return out_lines
+
+
+# 字面量字符串（含 r/b/u 前缀；f 前缀故意不匹配——f-string 插值即动态）
+_LITERAL_STRING_RE = re.compile(r"(?:[rRbBuU])?('[^'\\]*(?:\\.[^'\\]*)*'|\"[^\"\\]*(?:\\.[^\"\\]*)*\")")
+
+# 固定参数降级表：规则 pattern -> (固定时降级级别, 固定时消息)
+# 动态调用保持原级别与原消息；纯静态判断，确定性可复现
+FIXED_DOWNGRADE = {
+    r"\beval\s*\(": ("LOW", "eval() 固定目标，风险低（建议改用 ast.literal_eval）"),
+    r"\bexec\s*\(": ("LOW", "exec() 固定目标，风险低（建议改用 ast.literal_eval）"),
+    r"\b__import__\s*\(": ("LOW", "动态 import 固定目标，风险低"),
+    r"\bos\.system\s*\(": ("LOW", "固定命令 shell 调用，无注入面，建议人工确认"),
+    r"\bos\.popen\s*\(": ("LOW", "固定命令 shell 调用，无注入面，建议人工确认"),
+    r"\bsubprocess\.(run|call|Popen|check_output)\s*\([^)]*shell\s*=\s*True":
+        ("LOW", "固定命令 subprocess shell=True，无注入面，建议人工确认"),
+    r"\bpost\s*\([^)]*https?://": ("LOW", "对外请求，URL 固定，需确认接口用途"),
+}
+
+# md 示例/讨论语境标记词：行内含这些词时，注入模式命中最可能是
+# "讨论/演示如何检测注入"而非"实际注入指令"
+DISCUSSION_MARKERS = (
+    "example", "例如", "比如", "示例", "样例", "pattern", "正则",
+    "命中", "检测到", "模拟", "注入", "攻击", "恶意", "威胁", "渗透",
+    "演练", "防御", "识别", "拦截", "防止", "避免",
+)
+
+
+# 占位符/示例值标记：硬编码凭证命中时，若值命中这些标记则不算真实凭证
+PLACEHOLDER_MARKERS = (
+    "your-", "your_", "YOUR_", "YOUR-", "yourkey", "your_key", "your-api",
+    "xxx", "XXX", "example", "placeholder", "changeme", "sample", "demo",
+    "key-here", "key_here", "<", ">", "{{", "}}", "...", "…", "hunter2",
+)
+
+def is_placeholder_value(value: str) -> bool:
+    """判断凭证值是否为占位符/示例（your-key / xxx / example 等），是则非真实硬编码。"""
+    v = value.strip("\"' ")
+    low = v.lower()
+    if not v:
+        return True
+    for m in PLACEHOLDER_MARKERS:
+        if m in low:
+            return True
+    return False
+
+
+# 安全/防御主题上下文词：md 文档中出现这些词时，"jailbreak/ignore previous" 等
+# 命中最可能是"讨论安全方案"而非"实际注入指令"（防注入技能、红队工具、研究文档必含）
+SAFETY_CONTEXT_WORDS = (
+    "red-team", "red team", "redteam", "scan", "detect", "test", "guard",
+    "shield", "protect", "drill", "benchmark", "resistance", "evaluation",
+    "security", "safety", "harness", "红队", "越狱", "扫描", "检测", "防护",
+    "对抗", "加固", "测评", "审计", "基准", "防御", "安全", "风险",
+    # 威胁模型/防御说明类词：讲"外部文本可能含注入指令"也属于讨论而非指令本身
+    "untrusted", "external", "secrets", "leakage", "can say", "can't tell",
+)
+
 
 def scan_python_file(filepath: Path, result: ScanResult):
     """Scan a single Python file for dangerous patterns."""
@@ -316,6 +534,8 @@ def scan_python_file(filepath: Path, result: ScanResult):
         pass  # AST 分析失败不影响正则扫描
 
     lines = content.splitlines()
+    # v3.1.0: 整文件级字符串/注释剥离结果（跨行三引号 docstring 也算字符串）
+    code_lines = strip_strings_to_code(content)
 
     # Helper: check if line is a comment
     def is_comment_line(line: str) -> bool:
@@ -346,8 +566,10 @@ def scan_python_file(filepath: Path, result: ScanResult):
                 return True
         return False
 
-    # 1. Dangerous code patterns
+    # 1. Dangerous code patterns（code_lines 为整文件级字符串/注释剥离结果；
+    #    固定参数类规则逐匹配判断 固定 vs 动态，动态保持原级别）
     for pattern, severity, msg in DANGEROUS_CODE_PATTERNS:
+        downgrade = FIXED_DOWNGRADE.get(pattern)
         for i, line in enumerate(lines, 1):
             if is_comment_line(line):
                 continue
@@ -355,7 +577,24 @@ def scan_python_file(filepath: Path, result: ScanResult):
                 continue
             if i in ast_lines:  # AST 已经报过了，不要重复报
                 continue
-            if re.search(pattern, line):
+            if downgrade is not None:
+                base_line = _strip_comment(line)
+                code_line = code_lines[i - 1]
+                for m in re.finditer(pattern, base_line):
+                    # 命中点若落在字符串/docstring 剥离后的空格列上，说明是
+                    # 文案/文档里提到该词，非真实调用，跳过
+                    if m.start() >= len(code_line) or code_line[m.start()] == " ":
+                        continue
+                    open_pos = base_line.find("(", m.start())
+                    if open_pos != -1 and _call_args_are_literal(base_line, open_pos):
+                        sev, msg_out = downgrade
+                    else:
+                        sev, msg_out = severity, msg
+                    result.findings.append(Finding(
+                        severity=sev, category="dangerous-code",
+                        message=msg_out, file=str(filepath), line=i
+                    ))
+            elif re.search(pattern, code_lines[i - 1]):
                 result.findings.append(Finding(
                     severity=severity, category="dangerous-code",
                     message=msg, file=str(filepath), line=i
@@ -363,23 +602,52 @@ def scan_python_file(filepath: Path, result: ScanResult):
 
     # 2. Network patterns
     for pattern, severity, msg in NETWORK_PATTERNS:
+        downgrade = FIXED_DOWNGRADE.get(pattern)
         for i, line in enumerate(lines, 1):
             if is_comment_line(line):
                 continue
             if is_suppressed(i):
                 continue
-            if re.search(pattern, line):
+            if downgrade is not None:
+                base_line = _strip_comment(line)
+                code_line = code_lines[i - 1]
+                for m in re.finditer(pattern, base_line):
+                    if m.start() >= len(code_line) or code_line[m.start()] == " ":
+                        continue  # 命中在字符串/docstring 内，非真实调用
+                    open_pos = base_line.find("(", m.start())
+                    if open_pos != -1 and _call_args_are_literal(base_line, open_pos):
+                        sev, msg_out = downgrade
+                    else:
+                        sev, msg_out = severity, msg
+                    result.findings.append(Finding(
+                        severity=sev, category="network",
+                        message=msg_out, file=str(filepath), line=i
+                    ))
+            elif re.search(pattern, code_lines[i - 1]):
                 result.findings.append(Finding(
                     severity=severity, category="network",
                     message=msg, file=str(filepath), line=i
                 ))
 
-    # 3. Credential / secret patterns
+    # 3. Credential / secret patterns（凭证必须在字符串内，不能 clean_line；
+    #    用占位符过滤掉 your-xxx / example / {{}} 等示例与模板值）
     for pattern, severity, msg in CREDENTIAL_PATTERNS:
         for i, line in enumerate(lines, 1):
             if is_comment_line(line):
                 continue
-            if pattern.search(line):
+            if is_suppressed(i):
+                continue
+            m = pattern.search(line)
+            if m:
+                # 规则定义字符串自命中（如 re.compile(r"\.aws/credentials") 所在行）
+                # ——扫描器扫描自己的规则表时，规则定义字符串会被误判为真实凭证
+                if re.search(r're\.compile\(r?["\']', line) and is_inside_string(line, m.start()):
+                    continue
+                # 善意 INFO 规则：命中点若在字符串字面量内（建议文案/文档示例），跳过
+                if severity == "INFO" and is_inside_string(line, m.start()):
+                    continue
+                if len(m.groups()) >= 2 and is_placeholder_value(m.group(2)):
+                    continue  # 值形如 your-key / {{TOKEN}} / example → 示例或模板，非真实凭证
                 result.findings.append(Finding(
                     severity=severity, category="credential-leak",
                     message=msg, file=str(filepath), line=i
@@ -390,7 +658,9 @@ def scan_python_file(filepath: Path, result: ScanResult):
         for i, line in enumerate(lines, 1):
             if is_comment_line(line):
                 continue
-            if re.search(pattern, line):
+            if is_suppressed(i):
+                continue
+            if re.search(pattern, code_lines[i - 1]):
                 result.findings.append(Finding(
                     severity=severity, category="filesystem",
                     message=msg, file=str(filepath), line=i
@@ -401,7 +671,9 @@ def scan_python_file(filepath: Path, result: ScanResult):
         for i, line in enumerate(lines, 1):
             if is_comment_line(line):
                 continue
-            if re.search(pattern, line, re.IGNORECASE):
+            if is_suppressed(i):
+                continue
+            if re.search(pattern, code_lines[i - 1], re.IGNORECASE):
                 result.findings.append(Finding(
                     severity=severity, category="excessive-agency",
                     message=msg, file=str(filepath), line=i
@@ -421,20 +693,115 @@ def scan_python_file(filepath: Path, result: ScanResult):
 
 
 def scan_md_file(filepath: Path, result: ScanResult):
-    """Scan a Markdown file for prompt injection patterns."""
+    """Scan a Markdown file for prompt injection patterns AND credential leaks."""
     try:
         content = filepath.read_text(encoding="utf-8", errors="replace")
     except Exception:
         return
 
     lines = content.splitlines()
+
+    # 跳过 frontmatter（--- 到 ---）与代码块（``` ... ```），
+    # 避免元数据/示例代码被当作注入指令或真实凭证误报
+    in_frontmatter = content.startswith("---")
+    in_code_block = False
+    skipped_lines = set()
+    for i, line in enumerate(lines, 1):
+        stripped = line.strip()
+        if in_frontmatter:
+            if i > 1 and stripped == "---":
+                in_frontmatter = False
+            skipped_lines.add(i)
+            continue
+        if stripped.startswith("```"):
+            in_code_block = not in_code_block
+            skipped_lines.add(i)
+            continue
+        if in_code_block:
+            skipped_lines.add(i)
+
+    def is_safety_discussion(line: str) -> bool:
+        """该行是否在讨论安全/防御主题（红队、扫描、防护等），
+        此时 jailbreak / ignore previous 等词是主题词而非注入指令。"""
+        low = line.lower()
+        return any(w in low for w in SAFETY_CONTEXT_WORDS)
+
+    def _match_in_quoted(line: str, m_start: int) -> bool:
+        """命中位置是否在反引号/引号之内（示例载荷），非指令本身。"""
+        before = line[:m_start]
+        if before.count("`") % 2 == 1:
+            return True
+        if before.count('"') % 2 == 1 or before.count("'") % 2 == 1:
+            return True
+        return False
+
+    # 1. Prompt injection patterns（讨论语境跳过：安全主题/示例载荷/讨论标记词）
     for pattern, severity, msg in PROMPT_INJECTION_PATTERNS:
         for i, line in enumerate(lines, 1):
+            if i in skipped_lines:
+                continue
+            m = re.search(pattern, line, re.IGNORECASE)
+            if not m:
+                continue
+            if is_safety_discussion(line):
+                continue  # 安全/红队/扫描主题文档提及该词 = 主题词，非注入指令
+            # CRITICAL/HIGH 注入模式只允许安全主题框架跳过；
+            # 标记词/引号内示例跳过仅作用于 MEDIUM/LOW，避免恶意中文载荷漏报
+            if severity in ("MEDIUM", "LOW"):
+                if _match_in_quoted(line, m.start()):
+                    continue  # 命中文本在反引号/引号内（示例载荷），非指令
+                if any(w in line.lower() for w in DISCUSSION_MARKERS):
+                    continue  # 示例/讨论语境（"例如 ignore previous" 等描述）
+            result.findings.append(Finding(
+                severity=severity, category="prompt-injection",
+                message=msg, file=str(filepath), line=i
+            ))
+
+    # 2. Credential / secret patterns（.md 也检查，但过滤占位符与示例值）
+    for pattern, severity, msg in CREDENTIAL_PATTERNS:
+        for i, line in enumerate(lines, 1):
+            if i in skipped_lines:
+                continue
+            m = pattern.search(line)
+            if m:
+                if len(m.groups()) >= 2 and is_placeholder_value(m.group(2)):
+                    continue  # your-key / {{TOKEN}} / example 等示例与模板值
+                result.findings.append(Finding(
+                    severity=severity, category="credential-leak",
+                    message=msg + " (in .md file)", file=str(filepath), line=i
+                ))
+
+    # 3. 数字诚实性规则（仅剩高特异性模式，普通宣称数字不再报）
+    for pattern, severity, msg in HONESTY_PATTERNS:
+        for i, line in enumerate(lines, 1):
+            if i in skipped_lines:
+                continue
             if re.search(pattern, line, re.IGNORECASE):
                 result.findings.append(Finding(
-                    severity=severity, category="prompt-injection",
+                    severity=severity, category="honesty",
                     message=msg, file=str(filepath), line=i
                 ))
+
+    # 4. Excessive agency / exfiltration patterns（P0 修复：SKILL.md 等 md
+    #    文档同样检查外泄指令；讨论语境/引号示例跳过逻辑与注入一致）
+    for pattern, severity, msg in EXCESSIVE_AGENCY_PATTERNS:
+        for i, line in enumerate(lines, 1):
+            if i in skipped_lines:
+                continue
+            m = re.search(pattern, line, re.IGNORECASE)
+            if not m:
+                continue
+            if is_safety_discussion(line):
+                continue  # 安全/红队/扫描主题文档提及该词 = 主题词，非外泄指令
+            if severity in ("MEDIUM", "LOW"):
+                if _match_in_quoted(line, m.start()):
+                    continue  # 命中文本在反引号/引号内（示例载荷），非指令
+                if any(w in line.lower() for w in DISCUSSION_MARKERS):
+                    continue  # 示例/讨论语境（"例如 delete all files" 等描述）
+            result.findings.append(Finding(
+                severity=severity, category="exfiltration",
+                message=msg, file=str(filepath), line=i
+            ))
 
 
 def scan_dependencies(skill_path: Path, result: ScanResult):
@@ -479,7 +846,7 @@ def scan_dependencies(skill_path: Path, result: ScanResult):
                 headers={"Content-Type": "application/json"}
             )
 
-            with urllib.request.urlopen(req, timeout=5) as resp:  # nosec B310 - URL is fixed GitHub API, not user input
+            with urllib.request.urlopen(req, timeout=5) as resp:  # nosec B310 - URL is fixed OSV API, not user input; skillgate: ignore
                 data = json.loads(resp.read())
                 vulns = data.get("vulns", [])
                 if vulns:
@@ -507,16 +874,16 @@ def scan_shell_file(filepath: Path, result: ScanResult):
 
     lines = content.splitlines()
     dangerous_sh_patterns = [
-        (r"\brm\s+-rf?\s+/", "CRITICAL", "rm -rf / 危险删除"),
-        (r"\bcurl\s+.*\|\s*sh", "HIGH", "curl | sh 管道执行远程脚本"),
-        (r"\bwget\s+.*\|\s*bash", "HIGH", "wget | bash 管道执行远程脚本"),
+        (r"\brm\s+-rf?\s+/\s*(;|&&|\||$)", "CRITICAL", "rm -rf / 危险删除（仅根目录）"),
+        (r"\bcurl\s+.*\|\s*sh", "MEDIUM", "curl | sh 管道执行远程脚本（常见安装方式，需确认来源可信）"),
+        (r"\bwget\s+.*\|\s*bash", "MEDIUM", "wget | bash 管道执行远程脚本（常见安装方式，需确认来源可信）"),
         (r"\bchmod\s+777", "MEDIUM", "chmod 777 权限过松"),
         (r"\bsudo\s+", "MEDIUM", "sudo 权限提升"),
     ]
 
     for pattern, severity, msg in dangerous_sh_patterns:
         for i, line in enumerate(lines, 1):
-            if re.search(pattern, line):
+            if re.search(pattern, clean_line(line)):
                 result.findings.append(Finding(
                     severity=severity, category="dangerous-shell",
                     message=msg, file=str(filepath), line=i
@@ -566,6 +933,16 @@ def parse_frontmatter(filepath: Path, result: ScanResult):
             ))
 
     result.skill_name = result.frontmatter.get("name", filepath.parent.name)
+    
+    # 数字诚实性检查（新增！）
+    lines = content.splitlines()
+    for pattern, severity, msg in HONESTY_PATTERNS:
+        for i, line in enumerate(lines, 1):
+            if re.search(pattern, line, re.IGNORECASE):
+                result.findings.append(Finding(
+                    severity=severity, category="honesty",
+                    message=msg, file=str(filepath), line=i
+                ))
 
 
 def compute_trust_score(result: ScanResult) -> int:
@@ -595,14 +972,12 @@ def compute_trust_score(result: ScanResult) -> int:
         if required_present < len(FRONTMATTER_REQUIRED_FIELDS):
             score -= 10
 
-    # Clamp to 0-100
-    return max(0, min(100, score))
-
-    # Zero dependencies bonus
+    # Zero dependencies bonus（此前被提前 return 短路，永不执行——已修复）
     has_network = any(f.category == "network" for f in result.findings)
     if not has_network:
         score += 2
 
+    # Clamp to 0-100
     return max(0, min(100, score))
 
 
@@ -724,7 +1099,7 @@ def scan_skill(skill_dir: str) -> ScanResult:
     result = ScanResult(skill_dir=str(skill_path))
 
     # Default excluded directories
-    DEFAULT_EXCLUDES = {"tests", "test", "docs", "doc", ".git", "__pycache__", "node_modules"}
+    DEFAULT_EXCLUDES = {"tests", "test", "docs", "doc", ".git", "__pycache__", "node_modules", "._test_scratch", "_backup"}
 
     def should_exclude(filepath: Path) -> bool:
         """Check if a file should be excluded from scanning."""
@@ -739,15 +1114,15 @@ def scan_skill(skill_dir: str) -> ScanResult:
 
     if not skill_docs:
         result.findings.append(Finding(
-            severity="HIGH", category="structure",
-            message="未找到任何 skill 定义文件（SKILL.md / AGENTS.md / .cursorrules）",
+            severity="MEDIUM", category="structure",
+            message="未找到 skill 定义文件（SKILL.md / AGENTS.md / .cursorrules）",
             file=str(skill_path)
         ))
     else:
         for doc in skill_docs:
             # Try to parse frontmatter (only if it starts with ---)
             try:
-                content = doc.read_text(encoding="utf-8", errors="replace")
+                content = doc.read_text(encoding="utf-8-sig", errors="replace")
                 if content.startswith("---"):
                     parse_frontmatter(doc, result)
             except Exception:
@@ -802,6 +1177,20 @@ def scan_skill(skill_dir: str) -> ScanResult:
     result.grade = grade_from_score(result.trust_score)
 
     return result
+
+
+def _ci_exit(result: ScanResult, fail_under: int = None) -> int:
+    """机器可读格式（json/sarif/junit/markdown）统一门禁退出码。
+
+    P1-1 修复：此前 --fail-under 只在 terminal 分支计算退出码，CI 消费
+    json/sarif/junit/markdown 时 exit 恒 0，门禁静默失效。
+    现在：任一 CRITICAL/HIGH，或 trust_score < fail_under → exit 1；否则 0。
+    """
+    if result.critical_count > 0 or result.high_count > 0:
+        return 1
+    if fail_under is not None and result.trust_score < fail_under:
+        return 1
+    return 0
 
 
 def print_terminal_report(result: ScanResult, fail_under: int = None):
@@ -1141,6 +1530,7 @@ def main():
                 print(f"SARIF 报告已写入: {args.output}")
             else:
                 print(output)
+            sys.exit(_ci_exit(result, fail_under=args.fail_under))
         elif args.format == "junit":
             output = generate_junit_xml(result)
             if args.output:
@@ -1148,6 +1538,7 @@ def main():
                 print(f"JUnit XML 报告已写入: {args.output}")
             else:
                 print(output)
+            sys.exit(_ci_exit(result, fail_under=args.fail_under))
         elif args.format == "json":
             output = json.dumps(asdict(result), indent=2, ensure_ascii=False)
             if args.output:
@@ -1155,6 +1546,7 @@ def main():
                 print(f"JSON 报告已写入: {args.output}")
             else:
                 print(output)
+            sys.exit(_ci_exit(result, fail_under=args.fail_under))
         elif args.format == "markdown":
             lines = [
                 f"# SkillGate 扫描报告",
@@ -1177,6 +1569,7 @@ def main():
                 print(f"Markdown 报告已写入: {args.output}")
             else:
                 print(output)
+            sys.exit(_ci_exit(result, fail_under=args.fail_under))
         else:
             exit_code = print_terminal_report(result, fail_under=args.fail_under)
             sys.exit(exit_code)
