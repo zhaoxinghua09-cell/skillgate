@@ -10,6 +10,11 @@ Exit codes:
     0 = pass (all checks green)
     1 = fail (critical/high findings)
     2 = usage error
+
+正典声明：本文件为 LGD-Eval 评测线 skillgate 扫描器的发布正典副本。
+公开仓同步对：LGD-Eval/lgd-gate/skillgate.py 与 zhaoxinghua09-cell/skillgate/scripts/skillgate.py
+两仓内容逐字节一致（blob SHA 相同）；本地开发正典位于 coze-publish/02-skill-eval-engine/scripts/。
+改动请同步两公开仓，勿让双副本分叉（Muse 复测 P2-5 收敛要求）。
 """
 from __future__ import annotations
 
@@ -284,7 +289,7 @@ class ScanResult:
     frontmatter: dict = field(default_factory=dict)
     trust_score: int = 0
     grade: str = ""
-    rule_version: str = "v3.1.1"  # 规则版本号（有籍）
+    rule_version: str = "v3.1.2"  # 规则版本号（有籍）
 
     @property
     def critical_count(self): return len([f for f in self.findings if f.severity == "CRITICAL"])
@@ -701,24 +706,30 @@ def scan_md_file(filepath: Path, result: ScanResult):
 
     lines = content.splitlines()
 
-    # 跳过 frontmatter（--- 到 ---）与代码块（``` ... ```），
-    # 避免元数据/示例代码被当作注入指令或真实凭证误报
-    in_frontmatter = content.startswith("---")
+    # 代码块行（``` ... ```）跳过：示例载荷非指令本身
     in_code_block = False
-    skipped_lines = set()
+    code_lines = set()
     for i, line in enumerate(lines, 1):
-        stripped = line.strip()
-        if in_frontmatter:
-            if i > 1 and stripped == "---":
-                in_frontmatter = False
-            skipped_lines.add(i)
-            continue
-        if stripped.startswith("```"):
+        if line.strip().startswith("```"):
             in_code_block = not in_code_block
-            skipped_lines.add(i)
+            code_lines.add(i)
             continue
         if in_code_block:
-            skipped_lines.add(i)
+            code_lines.add(i)
+
+    # frontmatter 区域行号（Muse 复测 P0：frontmatter 的 description 是智能体
+    # 运行时实际读取的指令文本，属第一攻击面——注入/外泄扫描不得整段跳过，
+    # 仅凭证扫描跳过该区域以防元数据字段名误报）
+    fm_lines = set()
+    if content.startswith("---"):
+        for i, line in enumerate(lines, 1):
+            if i == 1:
+                fm_lines.add(i)
+                continue
+            if line.strip() == "---":
+                fm_lines.add(i)
+                break
+            fm_lines.add(i)
 
     def is_safety_discussion(line: str) -> bool:
         """该行是否在讨论安全/防御主题（红队、扫描、防护等），
@@ -738,7 +749,7 @@ def scan_md_file(filepath: Path, result: ScanResult):
     # 1. Prompt injection patterns（讨论语境跳过：安全主题/示例载荷/讨论标记词）
     for pattern, severity, msg in PROMPT_INJECTION_PATTERNS:
         for i, line in enumerate(lines, 1):
-            if i in skipped_lines:
+            if i in code_lines:
                 continue
             m = re.search(pattern, line, re.IGNORECASE)
             if not m:
@@ -757,10 +768,11 @@ def scan_md_file(filepath: Path, result: ScanResult):
                 message=msg, file=str(filepath), line=i
             ))
 
-    # 2. Credential / secret patterns（.md 也检查，但过滤占位符与示例值）
+    # 2. Credential / secret patterns（.md 也检查，但过滤占位符与示例值；
+    #    跳过 frontmatter 区域避免元数据字段名误报）
     for pattern, severity, msg in CREDENTIAL_PATTERNS:
         for i, line in enumerate(lines, 1):
-            if i in skipped_lines:
+            if i in code_lines or i in fm_lines:
                 continue
             m = pattern.search(line)
             if m:
@@ -774,7 +786,7 @@ def scan_md_file(filepath: Path, result: ScanResult):
     # 3. 数字诚实性规则（仅剩高特异性模式，普通宣称数字不再报）
     for pattern, severity, msg in HONESTY_PATTERNS:
         for i, line in enumerate(lines, 1):
-            if i in skipped_lines:
+            if i in code_lines:
                 continue
             if re.search(pattern, line, re.IGNORECASE):
                 result.findings.append(Finding(
@@ -786,7 +798,7 @@ def scan_md_file(filepath: Path, result: ScanResult):
     #    文档同样检查外泄指令；讨论语境/引号示例跳过逻辑与注入一致）
     for pattern, severity, msg in EXCESSIVE_AGENCY_PATTERNS:
         for i, line in enumerate(lines, 1):
-            if i in skipped_lines:
+            if i in code_lines:
                 continue
             m = re.search(pattern, line, re.IGNORECASE)
             if not m:
@@ -976,6 +988,14 @@ def compute_trust_score(result: ScanResult) -> int:
     has_network = any(f.category == "network" for f in result.findings)
     if not has_network:
         score += 2
+
+    # CRITICAL 注入/外泄封顶（Muse 复测 P0 窄修：注入命中必须硬降级，不只报发现）
+    injection_critical = any(
+        f.severity == "CRITICAL" and f.category in ("prompt-injection", "exfiltration")
+        for f in result.findings
+    )
+    if injection_critical:
+        score = min(score, 40)  # 存在 CRITICAL 注入/外泄 → 最高 D 档；_ci_exit 同时 exit 1 阻断
 
     # Clamp to 0-100
     return max(0, min(100, score))
