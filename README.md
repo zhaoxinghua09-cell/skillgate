@@ -1,3 +1,5 @@
+<!-- LGD-SCORE -->**LGD Trust Score: 97/100**<!-- /LGD-SCORE -->
+
 [![Auto Eval: LGD + OpenSSF](https://github.com/zhaoxinghua09-cell/skillgate/actions/workflows/auto-eval.yml/badge.svg)](https://github.com/zhaoxinghua09-cell/skillgate/actions/workflows/auto-eval.yml)
 
 <div align="center">
