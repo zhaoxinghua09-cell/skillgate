@@ -1085,6 +1085,36 @@ def find_skill_documents(skill_path: Path) -> list[Path]:
     return docs
 
 
+
+def _apply_finding_filters(result: ScanResult):
+    """Honor `skillgate: ignore` line markers and drop duplicate findings
+    (same file/line/message after stripping the [AST] prefix)."""
+    cache = {}
+
+    def file_lines(path):
+        if path not in cache:
+            try:
+                with open(path, encoding="utf-8", errors="replace") as f:
+                    cache[path] = f.read().splitlines()
+            except Exception:
+                cache[path] = []
+        return cache[path]
+
+    kept = []
+    seen = set()
+    for f in result.findings:
+        lines = file_lines(f.file)
+        if f.line and 0 < f.line <= len(lines) and "skillgate: ignore" in lines[f.line - 1]:
+            continue
+        msg = f.message.replace("[AST] ", "").strip().lower()
+        key = (f.file, f.line, msg)
+        if key in seen:
+            continue
+        seen.add(key)
+        kept.append(f)
+    result.findings = kept
+
+
 def scan_skill(skill_dir: str) -> ScanResult:
     skill_path = Path(skill_dir).resolve()
     if not skill_path.is_dir():
@@ -1175,6 +1205,7 @@ def scan_skill(skill_dir: str) -> ScanResult:
     scan_dependencies(skill_path, result)
 
     # Compute score
+    _apply_finding_filters(result)
     result.trust_score = compute_trust_score(result)
     result.grade = grade_from_score(result.trust_score)
 
