@@ -743,8 +743,9 @@ def scan_md_file(filepath: Path, result: ScanResult):
             m = re.search(pattern, line, re.IGNORECASE)
             if not m:
                 continue
-            if is_safety_discussion(line):
-                continue  # 安全/红队/扫描主题文档提及该词 = 主题词，非注入指令
+            action_like = re.search(r"(send|post|upload|exfiltrat|https?://)", line, re.IGNORECASE)
+            if is_safety_discussion(line) and not (severity in ("CRITICAL", "HIGH") and action_like):
+                continue  # 安全/红队/扫描主题文档提及该词 = 主题词；但带外发动作时仍报
             # CRITICAL/HIGH 注入模式只允许安全主题框架跳过；
             # 标记词/引号内示例跳过仅作用于 MEDIUM/LOW，避免恶意中文载荷漏报
             if severity in ("MEDIUM", "LOW"):
