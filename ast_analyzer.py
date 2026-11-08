@@ -31,8 +31,8 @@ class DangerousCallVisitor(ast.NodeVisitor):
         _DANGEROUS_EXEC: ("CRITICAL", "动态代码执行（同名调用）"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
         "compile": ("MEDIUM", "compile() 动态代码编译"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
         "__import__": ("MEDIUM", "__import__() 动态导入"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
-        "pickle.load": ("HIGH", "pickle.load() 反序列化"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
-        "pickle.loads": ("HIGH", "pickle.loads() 反序列化"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
+        "pickle.load": ("CRITICAL", "pickle.load() 反序列化执行"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
+        "pickle.loads": ("CRITICAL", "pickle.loads() 反序列化执行"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
         "os.system": ("CRITICAL", "os.system() shell 调用"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
         "os.popen": ("HIGH", "os.popen() shell 调用"),  # skillgate: ignore: rule-pattern library (language-analyzer AST patterns)
         "subprocess.call": ("HIGH", "subprocess.call()"),
@@ -115,6 +115,40 @@ class HardcodedSecretVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
 
+class EnvExfilVisitor(ast.NodeVisitor):
+    """Detect network calls combined with environment/secret access (exfiltration)."""
+
+    NET_PREFIXES = ("requests.", "urllib.request.", "urllib.", "http.client.", "socket.", "httpx.")
+    NET_NAMES = ("urlopen", "urlretrieve", "post", "put", "get", "request", "connect")
+
+    def __init__(self):
+        self.network_lines = []
+        self.env_lines = []
+
+    def visit_Call(self, node):
+        name = self._name(node.func)
+        if any(name.startswith(pfx) for pfx in self.NET_PREFIXES) or name in self.NET_NAMES:
+            self.network_lines.append(node.lineno)
+        self.generic_visit(node)
+
+    def visit_Attribute(self, node):
+        if self._name(node) in ("os.environ",):
+            self.env_lines.append(node.lineno)
+        self.generic_visit(node)
+
+    def _name(self, node):
+        if isinstance(node, ast.Name):
+            return node.id
+        if isinstance(node, ast.Attribute):
+            if isinstance(node.value, ast.Name):
+                return node.value.id + "." + node.attr
+            if isinstance(node.value, ast.Attribute):
+                return self._name(node.value) + "." + node.attr
+        if isinstance(node, ast.Call):
+            return self._name(node.func)
+        return ""
+
+
 def analyze_python_file(filepath: Path) -> List[AstFinding]:
     """Analyze a Python file with AST, return findings."""
     try:
@@ -134,6 +168,18 @@ def analyze_python_file(filepath: Path) -> List[AstFinding]:
     secret_visitor = HardcodedSecretVisitor()
     secret_visitor.visit(tree)
     findings.extend(secret_visitor.findings)
+
+    # Network call + environment variable access -> exfiltration risk
+    exfil_visitor = EnvExfilVisitor()
+    exfil_visitor.visit(tree)
+    if exfil_visitor.network_lines and exfil_visitor.env_lines:
+        line = min(exfil_visitor.network_lines + exfil_visitor.env_lines)
+        findings.append(AstFinding(
+            severity="CRITICAL",
+            message="疑似环境变量外泄（网络调用 + 环境变量/密钥访问）",
+            line=line,
+            col=0,
+        ))
 
     return findings
 
