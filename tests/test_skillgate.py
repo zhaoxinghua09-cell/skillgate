@@ -186,8 +186,8 @@ def test_weighted_scoring():
     result.findings.append(Finding(severity="LOW", category="test", message="test", file="test.py"))
 
     score = compute_trust_score(result)
-    # 100 - 15 - 8 - 4 - 1 - 20 (no frontmatter) = 52
-    assert score == 52, f"Expected 52, got {score}"
+    # 100 - 15 - 8 - 4 - 1 - 20 (no frontmatter) + 2 (zero-dependency bonus) = 54
+    assert score == 54, f"Expected 54, got {score}"
     print("✅ test_weighted_scoring passed")
 
 

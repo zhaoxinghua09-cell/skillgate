@@ -953,7 +953,8 @@ def compute_trust_score(result: ScanResult) -> int:
     - HIGH: -8 each
     - MEDIUM: -4 each
     - LOW: -1 each
-    - Missing frontmatter required fields: -10
+    - No frontmatter: -20; missing required fields: -10
+    - Zero-dependency bonus: +2 (when no network findings)
     """
     score = 100
 
