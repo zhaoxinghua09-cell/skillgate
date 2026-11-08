@@ -70,8 +70,9 @@ def run(cmd):
 """, encoding="utf-8")
 
         result = scan_skill(str(skill_dir))
-        assert result.critical_count > 0, "Should detect eval and os.system"
-        assert result.trust_score < 50, "Dangerous code should lower score significantly"
+        assert result.critical_count >= 2, "Should detect eval and os.system"
+        # Dedupe (2026-11-09) removes duplicate findings; score reflects one deduction per distinct finding.
+        assert result.trust_score < 80, "Dangerous code should lower score significantly"
         print("✅ test_scan_dangerous_code passed")
 
 
