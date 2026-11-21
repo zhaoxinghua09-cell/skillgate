@@ -1,0 +1,30 @@
+{
+  "algorithm": "sha256(sorted relpath + NUL + file sha256, per line)",
+  "history": [
+    {
+      "root_digest": "619281b9099d56130f591a01721ebb379e6a2da4d4338deadf33087d64f5392c",
+      "sequence": 1
+    }
+  ],
+  "root_digest": "619281b9099d56130f591a01721ebb379e6a2da4d4338deadf33087d64f5392c",
+  "schema_version": 2,
+  "sequence": 1,
+  "skill_count": 2,
+  "skills": [
+    {
+      "declared_name": "bad-example-skill",
+      "digest": "f69bb851ada06c0b82f8d4e35fb961437159eed6c4544982292d213b8fdf12c6",
+      "file_count": 2,
+      "has_description": true,
+      "path": "examples/bad-skill"
+    },
+    {
+      "declared_name": "good-example-skill",
+      "digest": "e2cdb28380406f8f5ee3e6e33d9fb4ff70fb78d7bcf144b63c40ac6a92391f5c",
+      "file_count": 2,
+      "has_description": true,
+      "path": "examples/good-skill"
+    }
+  ],
+  "validated_against": []
+}
