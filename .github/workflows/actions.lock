@@ -23,6 +23,7 @@ workflows:
     '.github/workflows/scorecard.yml':
         - 'actions/checkout@v7.0.1'
         - 'ossf/scorecard-action@v2.5.0'
+    '.github/workflows/skill-lock.yml': []
 dependencies:
     'actions/checkout@v7.0.1':
         ref: 'v7.0.1'
@@ -95,4 +96,3 @@ dependencies:
         commit: 'sha1-fa7117db83c52d787ae5a89f350999701505d78e'
         owner_id: 67707773
         repo_id: 421101922
-    '.github/workflows/skill-lock.yml': []
