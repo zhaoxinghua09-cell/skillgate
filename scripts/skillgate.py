@@ -19,6 +19,7 @@ Exit codes:
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import json
 import os
 import re
@@ -526,7 +527,21 @@ def scan_python_file(filepath: Path, result: ScanResult):
     try:
         from ast_analyzer import analyze_python_file
         ast_findings = analyze_python_file(filepath)
+
+        # 2026-11-27：`# skillgate: ignore` 是本仓通用约定，长期只有正则路径认它，
+        # AST 路径完全不看——于是 run-all-tests.py / run.py / ci-simulator.py 里
+        # 已写明 "internal test runner with fixed commands (reviewed)" 的行，
+        # 照样被判 CRITICAL（自扫描 22/100 F）。约定写了却不生效，比不写更坏。
+        _src_lines = content.splitlines()
+
+        def _ignored(lineno):
+            if not lineno or lineno > len(_src_lines):
+                return False
+            return "skillgate: ignore" in _src_lines[lineno - 1]
+
         for af in ast_findings:
+            if _ignored(af.line):
+                continue
             result.findings.append(Finding(
                 severity=af.severity,
                 category="ast-analysis",
@@ -1112,11 +1127,51 @@ def scan_skill(skill_dir: str) -> ScanResult:
     # Default excluded directories
     DEFAULT_EXCLUDES = {"tests", "test", "docs", "doc", ".git", "__pycache__", "node_modules", "._test_scratch", "_backup"}
 
+    def _load_config_excludes(root: Path) -> list:
+        """Read `paths.exclude` globs from <root>/.skillgate.yml (mini-YAML, no deps).
+
+        2026-11-27: 本仓从第一天就带着 .skillgate.yml（明确排除 examples/、vscode-extension/out/、
+        pressure_test.py 等"故意写坏"的样本与编译产物），但没有任何代码读它。
+        结果 dogfooding 自扫描把自己那些故意不安全的示例算进分数：18/100、F、23 条 findings。
+        配置在仓库里存在却不生效，比没有配置更坏——读的人会以为已经排除了。
+        """
+        cfg = root / ".skillgate.yml"
+        if not cfg.is_file():
+            return []
+        out, in_paths, in_excl = [], False, False
+        for raw in cfg.read_text(encoding="utf-8", errors="ignore").splitlines():
+            line = raw.rstrip()
+            if not line.strip() or line.lstrip().startswith("#"):
+                continue
+            if not line.startswith((" ", "\t")):
+                in_paths = line.strip().startswith("paths:")
+                in_excl = False
+                continue
+            s = line.strip()
+            if in_paths and s.startswith("exclude:"):
+                in_excl = True
+                continue
+            if in_paths and in_excl and s.startswith("-"):
+                item = re.sub(r"\s+#.*$", "", s[1:].strip()).strip().strip("\"'")
+                if item:
+                    out.append(item)
+        return out
+
+    CONFIG_EXCLUDES = _load_config_excludes(skill_path)
+
     def should_exclude(filepath: Path) -> bool:
         """Check if a file should be excluded from scanning."""
+        rel = filepath.relative_to(skill_path).as_posix()
         parts = filepath.relative_to(skill_path).parts
         for part in parts:
             if part in DEFAULT_EXCLUDES:
+                return True
+        for pat in CONFIG_EXCLUDES:
+            if fnmatch.fnmatch(rel, pat):
+                return True
+            # fnmatch 里 "**/x/**" 等于 "*/x/*"，匹配不到顶层的 "x/y.py"；
+            # 去掉 "**/" 前缀再比一次，保证顶层同名目录也被排除。
+            if pat.startswith("**/") and fnmatch.fnmatch(rel, pat[3:]):
                 return True
         return False
 
@@ -1179,6 +1234,29 @@ def scan_skill(skill_dir: str) -> ScanResult:
             continue
         scan_md_file(md_file, result)
         result.files_scanned += 1
+    # === 统一执行 `# skillgate: ignore`（三条路径共用同一约定） ===
+    # 2026-11-27：仓库自己到处写着这个注记（skillgate.py 的规则表、run-all-tests.py、
+    # extension.ts 都有），但只有 Python 正则路径认它；AST 与 JS 路径一律不看，
+    # 于是注过的行照样判红。这里在出分之前统一过一遍，注记才算数。
+    _ignored_cache = {}
+
+    def _line_ignored(path_str: str, lineno) -> bool:
+        if not lineno:
+            return False
+        if path_str not in _ignored_cache:
+            try:
+                _ignored_cache[path_str] = Path(path_str).read_text(
+                    encoding="utf-8", errors="ignore").splitlines()
+            except Exception:
+                _ignored_cache[path_str] = []
+        lines_ = _ignored_cache[path_str]
+        if lineno > len(lines_):
+            return False
+        return "skillgate: ignore" in lines_[lineno - 1]
+
+    result.findings = [f for f in result.findings
+                       if not _line_ignored(str(f.file), f.line)]
+
 
     # Scan dependencies for known vulnerabilities
     scan_dependencies(skill_path, result)

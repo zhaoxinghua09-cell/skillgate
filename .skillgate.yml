@@ -7,3 +7,4 @@ paths:
     - "**/vscode-extension/out/**"  # build artifacts (compiled JS)
     - "scripts/skillgate.py"        # byte-identical copy of the main entry point
     - "pressure_test.py"            # red-team stress tool that intentionally embeds dangerous samples
+    - "CHANGELOG.md"              # historical entries are corrected in the 2026-11-27 entry; history is not rewritten

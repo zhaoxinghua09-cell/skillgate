@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — 2026-11-27 能力数字与实测对齐（历史条目保留原文）
+
+自查（`python skillgate.py scan .` 的 honesty 规则指向本文件 1.0.0 条目）后逐项复算，对外文案长期写「600+ 规则 / 25 大类 / 17 种语言」，与代码不符：
+
+- 规则数：12 张 `*_PATTERNS` 表合计 **127 条**。复算方式：
+  `python -c "import skillgate as s; print(sum(len(v) for k, v in vars(s).items() if k.endswith('_PATTERNS')))"`
+- 类别：`CATEGORY_EXPLANATIONS` 共 **16 类**
+- 扫描范围：代码里实际 `rglob` 的是 `*.py` `*.sh` `*.js` `*.ts` `*.md` 五种，即 **5 类文件**（Python / Shell / JavaScript / TypeScript / Markdown）
+- 不存在 CVE 数据库、不存在 Docker 镜像扫描（1.0.0 条目里这两项同样不实）
+
+已同步修正 README.zh-CN、PROJECT-OVERVIEW、docs/paper.md、competitive-analysis、final-gap-analysis。
+CHANGELOG 历史条目不改写；以本条为准。
+
 ## [1.0.28] - 2026-11-04
 
 ### Security (honest batch exit; contained output)

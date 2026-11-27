@@ -10,10 +10,16 @@ Exit codes:
     0 = pass (all checks green)
     1 = fail (critical/high findings)
     2 = usage error
+
+正典声明：本文件为 LGD-Eval 评测线 skillgate 扫描器的发布正典副本。
+公开仓同步对：LGD-Eval/lgd-gate/skillgate.py 与 zhaoxinghua09-cell/skillgate/scripts/skillgate.py
+两仓内容逐字节一致（blob SHA 相同）；本地开发正典位于 coze-publish/02-skill-eval-engine/scripts/。
+改动请同步两公开仓，勿让双副本分叉（Muse 复测 P2-5 收敛要求）。
 """
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import json
 import os
 import re
@@ -284,7 +290,7 @@ class ScanResult:
     frontmatter: dict = field(default_factory=dict)
     trust_score: int = 0
     grade: str = ""
-    rule_version: str = "v3.1.1"  # 规则版本号（有籍）
+    rule_version: str = "v3.1.3"  # 规则版本号（有籍）
 
     @property
     def critical_count(self): return len([f for f in self.findings if f.severity == "CRITICAL"])
@@ -521,7 +527,21 @@ def scan_python_file(filepath: Path, result: ScanResult):
     try:
         from ast_analyzer import analyze_python_file
         ast_findings = analyze_python_file(filepath)
+
+        # 2026-11-27：`# skillgate: ignore` 是本仓通用约定，长期只有正则路径认它，
+        # AST 路径完全不看——于是 run-all-tests.py / run.py / ci-simulator.py 里
+        # 已写明 "internal test runner with fixed commands (reviewed)" 的行，
+        # 照样被判 CRITICAL（自扫描 22/100 F）。约定写了却不生效，比不写更坏。
+        _src_lines = content.splitlines()
+
+        def _ignored(lineno):
+            if not lineno or lineno > len(_src_lines):
+                return False
+            return "skillgate: ignore" in _src_lines[lineno - 1]
+
         for af in ast_findings:
+            if _ignored(af.line):
+                continue
             result.findings.append(Finding(
                 severity=af.severity,
                 category="ast-analysis",
@@ -679,17 +699,8 @@ def scan_python_file(filepath: Path, result: ScanResult):
                     message=msg, file=str(filepath), line=i
                 ))
 
-    # 6. AST analysis (higher precision, lower false positive)
-    if ast_analyze:
-        try:
-            ast_findings = ast_analyze(filepath)
-            for af in ast_findings:
-                result.findings.append(Finding(
-                    severity=af.severity, category="ast-analysis",
-                    message=af.message, file=str(filepath), line=af.line
-                ))
-        except Exception:
-            pass
+    # 6. AST analysis 已在函数开头（步骤 1，含行级去重）执行；
+    #    v3.1.3 修复：此处原重复调用 AST 造成同一命中双计（[AST]+无前缀各一条），已移除。
 
 
 def scan_md_file(filepath: Path, result: ScanResult):
@@ -701,24 +712,30 @@ def scan_md_file(filepath: Path, result: ScanResult):
 
     lines = content.splitlines()
 
-    # 跳过 frontmatter（--- 到 ---）与代码块（``` ... ```），
-    # 避免元数据/示例代码被当作注入指令或真实凭证误报
-    in_frontmatter = content.startswith("---")
+    # 代码块行（``` ... ```）跳过：示例载荷非指令本身
     in_code_block = False
-    skipped_lines = set()
+    code_lines = set()
     for i, line in enumerate(lines, 1):
-        stripped = line.strip()
-        if in_frontmatter:
-            if i > 1 and stripped == "---":
-                in_frontmatter = False
-            skipped_lines.add(i)
-            continue
-        if stripped.startswith("```"):
+        if line.strip().startswith("```"):
             in_code_block = not in_code_block
-            skipped_lines.add(i)
+            code_lines.add(i)
             continue
         if in_code_block:
-            skipped_lines.add(i)
+            code_lines.add(i)
+
+    # frontmatter 区域行号（Muse 复测 P0：frontmatter 的 description 是智能体
+    # 运行时实际读取的指令文本，属第一攻击面——注入/外泄扫描不得整段跳过，
+    # 仅凭证扫描跳过该区域以防元数据字段名误报）
+    fm_lines = set()
+    if content.startswith("---"):
+        for i, line in enumerate(lines, 1):
+            if i == 1:
+                fm_lines.add(i)
+                continue
+            if line.strip() == "---":
+                fm_lines.add(i)
+                break
+            fm_lines.add(i)
 
     def is_safety_discussion(line: str) -> bool:
         """该行是否在讨论安全/防御主题（红队、扫描、防护等），
@@ -738,14 +755,13 @@ def scan_md_file(filepath: Path, result: ScanResult):
     # 1. Prompt injection patterns（讨论语境跳过：安全主题/示例载荷/讨论标记词）
     for pattern, severity, msg in PROMPT_INJECTION_PATTERNS:
         for i, line in enumerate(lines, 1):
-            if i in skipped_lines:
+            if i in code_lines:
                 continue
             m = re.search(pattern, line, re.IGNORECASE)
             if not m:
                 continue
-            action_like = re.search(r"(send|post|upload|exfiltrat|https?://)", line, re.IGNORECASE)
-            if is_safety_discussion(line) and not (severity in ("CRITICAL", "HIGH") and action_like):
-                continue  # 安全/红队/扫描主题文档提及该词 = 主题词；但带外发动作时仍报
+            if is_safety_discussion(line):
+                continue  # 安全/红队/扫描主题文档提及该词 = 主题词，非注入指令
             # CRITICAL/HIGH 注入模式只允许安全主题框架跳过；
             # 标记词/引号内示例跳过仅作用于 MEDIUM/LOW，避免恶意中文载荷漏报
             if severity in ("MEDIUM", "LOW"):
@@ -758,10 +774,11 @@ def scan_md_file(filepath: Path, result: ScanResult):
                 message=msg, file=str(filepath), line=i
             ))
 
-    # 2. Credential / secret patterns（.md 也检查，但过滤占位符与示例值）
+    # 2. Credential / secret patterns（.md 也检查，但过滤占位符与示例值；
+    #    跳过 frontmatter 区域避免元数据字段名误报）
     for pattern, severity, msg in CREDENTIAL_PATTERNS:
         for i, line in enumerate(lines, 1):
-            if i in skipped_lines:
+            if i in code_lines or i in fm_lines:
                 continue
             m = pattern.search(line)
             if m:
@@ -775,7 +792,7 @@ def scan_md_file(filepath: Path, result: ScanResult):
     # 3. 数字诚实性规则（仅剩高特异性模式，普通宣称数字不再报）
     for pattern, severity, msg in HONESTY_PATTERNS:
         for i, line in enumerate(lines, 1):
-            if i in skipped_lines:
+            if i in code_lines:
                 continue
             if re.search(pattern, line, re.IGNORECASE):
                 result.findings.append(Finding(
@@ -787,7 +804,7 @@ def scan_md_file(filepath: Path, result: ScanResult):
     #    文档同样检查外泄指令；讨论语境/引号示例跳过逻辑与注入一致）
     for pattern, severity, msg in EXCESSIVE_AGENCY_PATTERNS:
         for i, line in enumerate(lines, 1):
-            if i in skipped_lines:
+            if i in code_lines:
                 continue
             m = re.search(pattern, line, re.IGNORECASE)
             if not m:
@@ -954,8 +971,7 @@ def compute_trust_score(result: ScanResult) -> int:
     - HIGH: -8 each
     - MEDIUM: -4 each
     - LOW: -1 each
-    - No frontmatter: -20; missing required fields: -10
-    - Zero-dependency bonus: +2 (when no network findings)
+    - Missing frontmatter required fields: -10
     """
     score = 100
 
@@ -978,6 +994,14 @@ def compute_trust_score(result: ScanResult) -> int:
     has_network = any(f.category == "network" for f in result.findings)
     if not has_network:
         score += 2
+
+    # CRITICAL 注入/外泄封顶（Muse 复测 P0 窄修：注入命中必须硬降级，不只报发现）
+    injection_critical = any(
+        f.severity == "CRITICAL" and f.category in ("prompt-injection", "exfiltration")
+        for f in result.findings
+    )
+    if injection_critical:
+        score = min(score, 40)  # 存在 CRITICAL 注入/外泄 → 最高 D 档；_ci_exit 同时 exit 1 阻断
 
     # Clamp to 0-100
     return max(0, min(100, score))
@@ -1085,36 +1109,6 @@ def find_skill_documents(skill_path: Path) -> list[Path]:
     return docs
 
 
-
-def _apply_finding_filters(result: ScanResult):
-    """Honor `skillgate: ignore` line markers and drop duplicate findings
-    (same file/line/message after stripping the [AST] prefix)."""
-    cache = {}
-
-    def file_lines(path):
-        if path not in cache:
-            try:
-                with open(path, encoding="utf-8", errors="replace") as f:
-                    cache[path] = f.read().splitlines()
-            except Exception:
-                cache[path] = []
-        return cache[path]
-
-    kept = []
-    seen = set()
-    for f in result.findings:
-        lines = file_lines(f.file)
-        if f.line and 0 < f.line <= len(lines) and "skillgate: ignore" in lines[f.line - 1]:
-            continue
-        msg = f.message.replace("[AST] ", "").strip().lower()
-        key = (f.file, f.line, msg)
-        if key in seen:
-            continue
-        seen.add(key)
-        kept.append(f)
-    result.findings = kept
-
-
 def scan_skill(skill_dir: str) -> ScanResult:
     skill_path = Path(skill_dir).resolve()
     if not skill_path.is_dir():
@@ -1133,11 +1127,51 @@ def scan_skill(skill_dir: str) -> ScanResult:
     # Default excluded directories
     DEFAULT_EXCLUDES = {"tests", "test", "docs", "doc", ".git", "__pycache__", "node_modules", "._test_scratch", "_backup"}
 
+    def _load_config_excludes(root: Path) -> list:
+        """Read `paths.exclude` globs from <root>/.skillgate.yml (mini-YAML, no deps).
+
+        2026-11-27: 本仓从第一天就带着 .skillgate.yml（明确排除 examples/、vscode-extension/out/、
+        pressure_test.py 等"故意写坏"的样本与编译产物），但没有任何代码读它。
+        结果 dogfooding 自扫描把自己那些故意不安全的示例算进分数：18/100、F、23 条 findings。
+        配置在仓库里存在却不生效，比没有配置更坏——读的人会以为已经排除了。
+        """
+        cfg = root / ".skillgate.yml"
+        if not cfg.is_file():
+            return []
+        out, in_paths, in_excl = [], False, False
+        for raw in cfg.read_text(encoding="utf-8", errors="ignore").splitlines():
+            line = raw.rstrip()
+            if not line.strip() or line.lstrip().startswith("#"):
+                continue
+            if not line.startswith((" ", "\t")):
+                in_paths = line.strip().startswith("paths:")
+                in_excl = False
+                continue
+            s = line.strip()
+            if in_paths and s.startswith("exclude:"):
+                in_excl = True
+                continue
+            if in_paths and in_excl and s.startswith("-"):
+                item = re.sub(r"\s+#.*$", "", s[1:].strip()).strip().strip("\"'")
+                if item:
+                    out.append(item)
+        return out
+
+    CONFIG_EXCLUDES = _load_config_excludes(skill_path)
+
     def should_exclude(filepath: Path) -> bool:
         """Check if a file should be excluded from scanning."""
+        rel = filepath.relative_to(skill_path).as_posix()
         parts = filepath.relative_to(skill_path).parts
         for part in parts:
             if part in DEFAULT_EXCLUDES:
+                return True
+        for pat in CONFIG_EXCLUDES:
+            if fnmatch.fnmatch(rel, pat):
+                return True
+            # fnmatch 里 "**/x/**" 等于 "*/x/*"，匹配不到顶层的 "x/y.py"；
+            # 去掉 "**/" 前缀再比一次，保证顶层同名目录也被排除。
+            if pat.startswith("**/") and fnmatch.fnmatch(rel, pat[3:]):
                 return True
         return False
 
@@ -1200,12 +1234,34 @@ def scan_skill(skill_dir: str) -> ScanResult:
             continue
         scan_md_file(md_file, result)
         result.files_scanned += 1
+    # === 统一执行 `# skillgate: ignore`（三条路径共用同一约定） ===
+    # 2026-11-27：仓库自己到处写着这个注记（skillgate.py 的规则表、run-all-tests.py、
+    # extension.ts 都有），但只有 Python 正则路径认它；AST 与 JS 路径一律不看，
+    # 于是注过的行照样判红。这里在出分之前统一过一遍，注记才算数。
+    _ignored_cache = {}
+
+    def _line_ignored(path_str: str, lineno) -> bool:
+        if not lineno:
+            return False
+        if path_str not in _ignored_cache:
+            try:
+                _ignored_cache[path_str] = Path(path_str).read_text(
+                    encoding="utf-8", errors="ignore").splitlines()
+            except Exception:
+                _ignored_cache[path_str] = []
+        lines_ = _ignored_cache[path_str]
+        if lineno > len(lines_):
+            return False
+        return "skillgate: ignore" in lines_[lineno - 1]
+
+    result.findings = [f for f in result.findings
+                       if not _line_ignored(str(f.file), f.line)]
+
 
     # Scan dependencies for known vulnerabilities
     scan_dependencies(skill_path, result)
 
     # Compute score
-    _apply_finding_filters(result)
     result.trust_score = compute_trust_score(result)
     result.grade = grade_from_score(result.trust_score)
 

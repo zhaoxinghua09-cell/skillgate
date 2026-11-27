@@ -34,13 +34,27 @@
 
 ## ✨ 特性
 
-- 🔍 **600+ 条安全规则**，覆盖 25 大类，17 种语言
+- 🔍 **127 条安全规则**，覆盖 16 类（危险代码 / 凭证泄露 / 提示注入 / AST 等），扫描 Python / Shell / JavaScript / TypeScript / Markdown 共 5 类文件
 - 🏆 **信任评分**（A+ 到 D）——一个数字你就能信任
 - 📦 **全平台支持**：Claude Code、Cursor、Codex、Gemini、Copilot
 - 🚀 **一行命令安装**：`npx skills add zhaoxinghua09-cell/skillgate`
 - 📴 **离线可用**：不需要联网，本地运行
 - 🪶 **零依赖**：装完就能跑，不需要装一堆东西
 - 🌐 **跨平台**：Windows / Mac / Linux 都能用
+
+### 抑制误报：`# skillgate: ignore`
+
+命中经人工复核、但仍被规则抓到的一行，可在**同一行**末尾加注记：
+
+```python
+os.system("fixed command")  # skillgate: ignore: fixed commands only, reviewed 2026-11-27
+```
+
+约束（2026-11-27 起三条扫描路径统一生效：正则 / AST / JS）：
+
+- 只对**该行**生效；注记写在上一行不会连带放过下一行（红队实测：仍判红）。
+- 注记后面要写复核理由。空注记技术上也能过，但评审会追问理由。
+- 这不是"整仓豁免"，整仓级别的排除写在 `.skillgate.yml` 的 `paths.exclude` 里，并需说明为什么。
 
 ---
 

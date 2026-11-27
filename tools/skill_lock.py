@@ -675,7 +675,7 @@ def cmd_selftest(root: Path) -> int:
                     print(f"ledger control OK: emptied log rejected (exit {rc5})")
                 _write_lf(ledger_path, "\n".join(lines) + "\n")
     finally:
-        shutil.rmtree(tmp, ignore_errors=True)
+        shutil.rmtree(tmp, ignore_errors=True)  # skillgate: ignore: tmp = Path(tempfile.mkdtemp()) at the top of this selftest (line 552) — reviewed 2026-11-27, removes only this function's own temp dir
     return 1 if failures else 0
 
 

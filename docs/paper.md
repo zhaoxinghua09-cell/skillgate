@@ -14,7 +14,7 @@ As AI coding agents like Claude Code, Cursor, and Codex become mainstream, the e
 
 We present **SkillGate**, an open-source, local-first trust infrastructure designed for AI agent skills. SkillGate combines:
 
-1. **Static security scanning** — 600+ rules across 25 categories, detecting hardcoded secrets, dangerous code patterns, and suspicious network calls across 17 programming languages
+1. **Static security scanning** — 127 rules across 16 categories, detecting hardcoded secrets, dangerous code patterns, and suspicious network calls across 5 file types (Python, Shell, JavaScript, TypeScript, Markdown)
 2. **SKILL.md quality evaluation** — checking for missing metadata, inconsistent descriptions, and structural issues that confuse agent selection
 3. **A single Trust Score** (A+ to D) that distills all findings into one number users can understand at a glance
 
@@ -88,7 +88,7 @@ SkillGate has three layers:
 
 ### 4.1 Security Scanner
 
-The security scanner checks for 25 categories of issues across 17 programming languages:
+The security scanner checks for 16 categories of issues across 5 file types:
 
 | Category | Examples |
 |----------|----------|
@@ -96,13 +96,12 @@ The security scanner checks for 25 categories of issues across 17 programming la
 | Dangerous code | `eval()`, `exec()`, `os.system()`, `subprocess` with shell=True |
 | Network calls | Unnecessary or suspicious outbound HTTP requests |
 | File system access | Reading/writing files outside the skill directory |
-| Dependency vulnerabilities | Known CVEs in required packages |
-| Docker issues | Outdated base images, EOL packages |
+| Dependency issues | Heuristic checks on declared dependencies (no CVE database) |
 
 The scanner uses a combination of:
 - **Regex pattern matching** for known bad patterns
 - **AST analysis** for Python and JavaScript code
-- **CVE database** lookup for common vulnerable package versions
+- **No CVE database** — dependency checks are heuristic and are described as such
 
 ### 4.2 SKILL.md Quality Checker
 
@@ -182,7 +181,7 @@ SkillGate is built specifically for the agent skill ecosystem.
 ### 6.2 Limitations
 
 - **Static analysis only**: SkillGate doesn't run the skill, so it can't detect runtime behavior
-- **Language coverage**: 17 languages supported, but some niche languages are not yet covered
+- **Language coverage**: 5 file types (Python, Shell, JavaScript, TypeScript, Markdown); niche programming languages are not yet covered
 - **False positives**: Like all scanners, SkillGate can flag legitimate patterns as suspicious. The `--lenient` mode is provided to reduce noise.
 
 ### 6.3 Future Work
